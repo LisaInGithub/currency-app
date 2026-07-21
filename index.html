@@ -16,7 +16,7 @@
 
   <header class="nav">
     <h1 class="nav-title">旅行貨幣</h1>
-    <p class="nav-subtitle">即時匯率換算，說走就走</p>
+    <p class="nav-subtitle" id="navSubtitle">載入中…</p>
     <button id="statusBadge" class="status-badge" type="button">
       <span id="statusDot" class="status-dot"></span>
       <span id="statusText">載入匯率中…</span>
@@ -29,41 +29,12 @@
 
   <main class="content">
 
-    <section class="card converter-card" id="converterCard">
+    <div class="card-list" id="cardList"></div>
 
-      <button class="currency-row" id="fromRow" type="button" data-side="from">
-        <span class="currency-avatar" id="fromFlag">🇹🇼</span>
-        <span class="currency-meta">
-          <span class="currency-code" id="fromCode">TWD</span>
-          <span class="currency-name" id="fromName">新台幣</span>
-        </span>
-        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <input class="amount-input" id="fromAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="輸入金額">
-
-      <div class="swap-divider">
-        <div class="divider-line"></div>
-        <button class="swap-btn" id="swapBtn" type="button" aria-label="交換幣別">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 7h10M13 3l4 4-4 4"/>
-            <path d="M17 17H7M11 21l-4-4 4-4"/>
-          </svg>
-        </button>
-      </div>
-
-      <button class="currency-row" id="toRow" type="button" data-side="to">
-        <span class="currency-avatar" id="toFlag">🇺🇸</span>
-        <span class="currency-meta">
-          <span class="currency-code" id="toCode">USD</span>
-          <span class="currency-name" id="toName">美金</span>
-        </span>
-        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="amount-display" id="toAmount">0</div>
-
-    </section>
-
-    <p class="rate-line" id="rateLine">—</p>
+    <button class="add-currency-card" id="manageBtn" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <span>管理貨幣</span>
+    </button>
 
     <div class="calc-toolbar" id="calcToolbar">
       <button type="button" data-op="+">＋</button>
@@ -78,7 +49,7 @@
 
     <section class="card trend-card" id="trendCard">
       <div class="trend-head">
-        <span class="section-label">匯率趨勢</span>
+        <span class="section-label" id="trendLabel">匯率趨勢</span>
         <span class="trend-delta" id="trendDelta">近 14 天</span>
       </div>
       <svg class="sparkline" id="sparkline" viewBox="0 0 300 72" preserveAspectRatio="none" aria-hidden="true">
@@ -94,16 +65,6 @@
       <p class="trend-caption" id="trendCaption">正在載入近期走勢…</p>
     </section>
 
-    <section class="list-section" id="recentSection">
-      <div class="section-head"><span class="section-label">最近使用</span></div>
-      <div class="chip-row" id="recentChips"></div>
-    </section>
-
-    <section class="list-section" id="favoriteSection">
-      <div class="section-head"><span class="section-label">收藏貨幣</span></div>
-      <div class="favorite-list" id="favoriteList"></div>
-    </section>
-
   </main>
 
   <footer class="footer">
@@ -117,9 +78,9 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5h5V15h2v4.5h5V10"/></svg>
     <span>換算</span>
   </button>
-  <button class="tab-btn" type="button" data-tab="favorites">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg>
-    <span>收藏</span>
+  <button class="tab-btn" type="button" data-tab="manage">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9"/><circle cx="19.5" cy="17" r="1.6"/></svg>
+    <span>貨幣</span>
   </button>
   <button class="tab-btn" type="button" data-tab="settings">
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -130,15 +91,16 @@
   </button>
 </nav>
 
-<div class="sheet-overlay hidden" id="pickerOverlay">
-  <div class="sheet" id="pickerSheet" role="dialog" aria-modal="true">
+<div class="sheet-overlay hidden" id="manageOverlay">
+  <div class="sheet" id="manageSheet" role="dialog" aria-modal="true">
     <div class="sheet-grabber"></div>
     <div class="sheet-head">
-      <h2 class="sheet-title" id="pickerTitle">選擇貨幣</h2>
-      <button class="sheet-close" id="pickerClose" type="button" aria-label="關閉">
+      <h2 class="sheet-title">管理貨幣</h2>
+      <button class="sheet-close" id="manageClose" type="button" aria-label="關閉">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
+    <p class="settings-hint" id="manageCount">已選 4 / 5 種貨幣，首頁會依序顯示</p>
     <div class="picker-list" id="pickerList"></div>
   </div>
 </div>
@@ -155,18 +117,7 @@
 
     <div class="settings-block">
       <p class="settings-hint">輸入 1 美金可兌換的各幣別金額，儲存後將以此為準（直到你按「改回即時匯率」）。</p>
-      <div class="manual-row">
-        <label for="manualTWD">1 USD = <span class="unit">TWD</span></label>
-        <input id="manualTWD" type="text" inputmode="decimal" autocomplete="off">
-      </div>
-      <div class="manual-row">
-        <label for="manualMNT">1 USD = <span class="unit">MNT</span></label>
-        <input id="manualMNT" type="text" inputmode="decimal" autocomplete="off">
-      </div>
-      <div class="manual-row">
-        <label for="manualKRW">1 USD = <span class="unit">KRW</span></label>
-        <input id="manualKRW" type="text" inputmode="decimal" autocomplete="off">
-      </div>
+      <div id="manualRows"></div>
       <div class="manual-actions">
         <button id="manualSave" class="btn btn-primary" type="button">儲存手動匯率</button>
         <button id="manualReset" class="btn btn-secondary" type="button">改回即時匯率</button>

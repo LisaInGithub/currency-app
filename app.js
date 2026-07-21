@@ -3,19 +3,53 @@
     TWD: { name: '新台幣', flag: '🇹🇼' },
     MNT: { name: '蒙圖', flag: '🇲🇳' },
     USD: { name: '美金', flag: '🇺🇸' },
+    JPY: { name: '日圓', flag: '🇯🇵' },
     KRW: { name: '韓元', flag: '🇰🇷' },
+    CNY: { name: '人民幣', flag: '🇨🇳' },
+    HKD: { name: '港幣', flag: '🇭🇰' },
+    EUR: { name: '歐元', flag: '🇪🇺' },
+    GBP: { name: '英鎊', flag: '🇬🇧' },
+    THB: { name: '泰銖', flag: '🇹🇭' },
+    VND: { name: '越南盾', flag: '🇻🇳' },
+    SGD: { name: '新加坡幣', flag: '🇸🇬' },
+    MYR: { name: '馬來西亞令吉', flag: '🇲🇾' },
+    PHP: { name: '菲律賓披索', flag: '🇵🇭' },
+    IDR: { name: '印尼盾', flag: '🇮🇩' },
+    AUD: { name: '澳幣', flag: '🇦🇺' },
+    CAD: { name: '加幣', flag: '🇨🇦' },
+    NZD: { name: '紐西蘭幣', flag: '🇳🇿' },
   };
   const CODES = Object.keys(CURRENCIES);
+  const DEFAULT_SELECTED = ['TWD', 'MNT', 'USD', 'KRW'];
+  const MAX_SELECTED = 5;
   const API_URL = 'https://open.er-api.com/v6/latest/USD';
 
   // Last-resort seed used only if there is no network AND no cache yet.
-  const FALLBACK_RATES = { USD: 1, TWD: 32.3, MNT: 3600, KRW: 1480 };
+  const FALLBACK_RATES = {
+    USD: 1, TWD: 32.3, MNT: 3600, JPY: 155, KRW: 1480, CNY: 7.2, HKD: 7.8,
+    EUR: 0.92, GBP: 0.78, THB: 36, VND: 25450, SGD: 1.34, MYR: 4.7, PHP: 58,
+    IDR: 16200, AUD: 1.52, CAD: 1.37, NZD: 1.65,
+  };
 
   const QUICK_AMOUNTS = {
     TWD: [100, 500, 1000, 5000],
     MNT: [1000, 5000, 10000, 50000],
     USD: [10, 50, 100, 500],
+    JPY: [1000, 5000, 10000, 50000],
     KRW: [1000, 10000, 50000, 100000],
+    CNY: [100, 500, 1000, 5000],
+    HKD: [100, 500, 1000, 5000],
+    EUR: [10, 50, 100, 500],
+    GBP: [10, 50, 100, 500],
+    THB: [100, 500, 1000, 5000],
+    VND: [50000, 100000, 500000, 1000000],
+    SGD: [10, 50, 100, 500],
+    MYR: [50, 100, 500, 1000],
+    PHP: [100, 500, 1000, 5000],
+    IDR: [50000, 100000, 500000, 1000000],
+    AUD: [10, 50, 100, 500],
+    CAD: [10, 50, 100, 500],
+    NZD: [10, 50, 100, 500],
   };
 
   const LS_LIVE_RATES = 'cc_live_rates';
@@ -23,55 +57,38 @@
   const LS_MANUAL_RATES = 'cc_manual_rates';
   const LS_MANUAL_ON = 'cc_manual_on';
   const LS_INSTALL_DISMISSED = 'cc_install_dismissed';
-  const LS_FAVORITES = 'cc_favorites';
-  const LS_RECENTS = 'cc_recents';
-  const LS_FROM = 'cc_from';
-  const LS_TO = 'cc_to';
+  const LS_SELECTED = 'cc_selected_currencies';
+  const LS_ACTIVE = 'cc_active_currency';
   const LS_RATE_HISTORY = 'cc_rate_history';
 
   const HISTORY_MAX_DAYS = 30;
-  const RECENTS_MAX = 5;
 
   const $ = (id) => document.getElementById(id);
 
   const els = {
+    navSubtitle: $('navSubtitle'),
     statusBadge: $('statusBadge'),
-    statusDot: $('statusDot'),
     statusText: $('statusText'),
     offlineBanner: $('offlineBanner'),
-    fromRow: $('fromRow'),
-    fromFlag: $('fromFlag'),
-    fromCode: $('fromCode'),
-    fromName: $('fromName'),
-    fromAmount: $('fromAmount'),
-    toRow: $('toRow'),
-    toFlag: $('toFlag'),
-    toCode: $('toCode'),
-    toName: $('toName'),
-    toAmount: $('toAmount'),
-    swapBtn: $('swapBtn'),
-    rateLine: $('rateLine'),
+    cardList: $('cardList'),
+    manageBtn: $('manageBtn'),
     calcToolbar: $('calcToolbar'),
     quickAmounts: $('quickAmounts'),
+    trendLabel: $('trendLabel'),
     trendDelta: $('trendDelta'),
     trendCaption: $('trendCaption'),
     sparklineLine: $('sparklineLine'),
     sparklineFill: $('sparklineFill'),
-    recentChips: $('recentChips'),
-    favoriteList: $('favoriteList'),
     lastUpdated: $('lastUpdated'),
     scrollRoot: $('scrollRoot'),
     tabBar: $('tabBar'),
-    pickerOverlay: $('pickerOverlay'),
-    pickerSheet: $('pickerSheet'),
-    pickerTitle: $('pickerTitle'),
+    manageOverlay: $('manageOverlay'),
+    manageCount: $('manageCount'),
     pickerList: $('pickerList'),
-    pickerClose: $('pickerClose'),
+    manageClose: $('manageClose'),
     settingsOverlay: $('settingsOverlay'),
     settingsClose: $('settingsClose'),
-    manualTWD: $('manualTWD'),
-    manualMNT: $('manualMNT'),
-    manualKRW: $('manualKRW'),
+    manualRows: $('manualRows'),
     manualSave: $('manualSave'),
     manualReset: $('manualReset'),
     installToast: $('installToast'),
@@ -83,18 +100,15 @@
   let liveTime = null;
   let manualRates = null;
   let manualOn = false;
-  let fromCurrency = 'TWD';
-  let toCurrency = 'USD';
-  let fromAmount = 1000;
-  let favorites = new Set();
-  let recents = [];
-  let pickerSide = null;
-  let swapRotation = 0;
+  let selected = [...DEFAULT_SELECTED];
+  let activeCurrency = 'TWD';
+  let activeAmount = 1000;
 
   function currentRates() {
-    if (manualOn && manualRates) return manualRates;
-    if (liveRates) return liveRates;
-    return FALLBACK_RATES;
+    const merged = { ...FALLBACK_RATES };
+    if (liveRates) Object.assign(merged, liveRates);
+    if (manualOn && manualRates) Object.assign(merged, manualRates);
+    return merged;
   }
 
   function formatNumber(n) {
@@ -104,14 +118,8 @@
     return n.toLocaleString('en-US', { maximumFractionDigits: digits });
   }
 
-  function formatRate(n) {
-    if (!isFinite(n)) return '0';
-    const digits = Math.abs(n) < 10 ? 4 : 2;
-    return n.toLocaleString('en-US', { maximumFractionDigits: digits });
-  }
-
-  // Small recursive-descent parser for +-*/() so the amount field can double
-  // as a calculator (e.g. "120+35*2") without using eval().
+  // Small recursive-descent parser for +-*/() so the amount fields can
+  // double as a calculator (e.g. "120+35*2") without using eval().
   function parseExpression(expr) {
     const cleaned = String(expr).replace(/,/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/\s+/g, '');
     if (!cleaned || !/^[0-9+\-*/.()]+$/.test(cleaned)) return NaN;
@@ -154,38 +162,53 @@
     return result;
   }
 
-  // ---------- Converter ----------
+  // ---------- Card list ----------
 
-  function renderCurrencyMeta() {
-    const from = CURRENCIES[fromCurrency];
-    const to = CURRENCIES[toCurrency];
-    els.fromFlag.textContent = from.flag;
-    els.fromCode.textContent = fromCurrency;
-    els.fromName.textContent = from.name;
-    els.toFlag.textContent = to.flag;
-    els.toCode.textContent = toCurrency;
-    els.toName.textContent = to.name;
+  function orderedSelected() {
+    return CODES.filter((c) => selected.includes(c));
   }
 
-  function renderConversion() {
+  function buildCards() {
+    els.cardList.innerHTML = '';
+    orderedSelected().forEach((code) => {
+      const info = CURRENCIES[code];
+      const card = document.createElement('section');
+      card.className = 'card currency-card';
+      card.dataset.currency = code;
+      card.innerHTML = `
+        <span class="currency-avatar">${info.flag}</span>
+        <span class="currency-meta">
+          <span class="currency-code">${code}</span>
+          <span class="currency-name">${info.name}</span>
+        </span>
+        <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="${code}" aria-label="${info.name}金額">`;
+      els.cardList.appendChild(card);
+    });
+  }
+
+  function renderConversions() {
     const rates = currentRates();
-    const amountUSD = fromAmount / rates[fromCurrency];
-    const toValue = amountUSD * rates[toCurrency];
-    els.toAmount.textContent = formatNumber(toValue);
-    const unitRate = rates[toCurrency] / rates[fromCurrency];
-    els.rateLine.textContent = `1 ${fromCurrency} = ${formatRate(unitRate)} ${toCurrency}`;
+    const amountUSD = activeAmount / rates[activeCurrency];
+    els.cardList.querySelectorAll('.currency-card').forEach((card) => {
+      const code = card.dataset.currency;
+      card.classList.toggle('active', code === activeCurrency);
+      if (code === activeCurrency) return;
+      const input = card.querySelector('.amount-input');
+      input.value = formatNumber(amountUSD * rates[code]);
+    });
   }
 
   function renderQuickAmounts() {
     els.quickAmounts.innerHTML = '';
-    QUICK_AMOUNTS[fromCurrency].forEach((amt) => {
+    (QUICK_AMOUNTS[activeCurrency] || [10, 50, 100, 500]).forEach((amt) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = formatNumber(amt);
       btn.addEventListener('click', () => {
-        fromAmount = amt;
-        els.fromAmount.value = formatNumber(amt);
-        renderConversion();
+        activeAmount = amt;
+        const input = els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
+        if (input) input.value = formatNumber(amt);
+        renderConversions();
       });
       els.quickAmounts.appendChild(btn);
     });
@@ -217,93 +240,8 @@
     }
   }
 
-  // ---------- Recently used & favorites ----------
-
-  function addRecent(code) {
-    recents = [code, ...recents.filter((c) => c !== code)].slice(0, RECENTS_MAX);
-    localStorage.setItem(LS_RECENTS, JSON.stringify(recents));
-  }
-
-  function renderRecents() {
-    els.recentChips.innerHTML = '';
-    const list = recents.filter((c) => c !== toCurrency);
-    if (!list.length) {
-      const empty = document.createElement('p');
-      empty.className = 'chip-row-empty';
-      empty.textContent = '切換過的貨幣會顯示在這裡';
-      els.recentChips.appendChild(empty);
-      return;
-    }
-    list.forEach((code) => {
-      const info = CURRENCIES[code];
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'chip';
-      chip.innerHTML = `<span class="chip-flag">${info.flag}</span>${code}`;
-      chip.addEventListener('click', () => setToCurrency(code));
-      els.recentChips.appendChild(chip);
-    });
-  }
-
-  function starIconSvg() {
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg>';
-  }
-
-  function toggleFavorite(code) {
-    if (favorites.has(code)) favorites.delete(code);
-    else favorites.add(code);
-    localStorage.setItem(LS_FAVORITES, JSON.stringify([...favorites]));
-    renderFavorites();
-    if (pickerSide) renderPickerList();
-  }
-
-  function renderFavorites() {
-    els.favoriteList.innerHTML = '';
-    const rates = currentRates();
-    const amountUSD = fromAmount / rates[fromCurrency];
-    const list = CODES.filter((c) => favorites.has(c) && c !== fromCurrency);
-
-    if (!list.length) {
-      const empty = document.createElement('p');
-      empty.className = 'chip-row-empty';
-      empty.textContent = '在貨幣選單中點選星星，收藏常用貨幣';
-      els.favoriteList.appendChild(empty);
-      return;
-    }
-
-    list.forEach((code) => {
-      const info = CURRENCIES[code];
-      const row = document.createElement('div');
-      row.className = 'favorite-row';
-
-      const main = document.createElement('button');
-      main.type = 'button';
-      main.className = 'favorite-row-main';
-      const value = amountUSD * rates[code];
-      main.innerHTML = `
-        <span class="currency-avatar">${info.flag}</span>
-        <span class="currency-meta">
-          <span class="currency-code">${code}</span>
-          <span class="currency-name">${info.name}</span>
-        </span>`;
-      main.addEventListener('click', () => setToCurrency(code));
-
-      const valueEl = document.createElement('span');
-      valueEl.className = 'favorite-row-value';
-      valueEl.textContent = formatNumber(value);
-
-      const star = document.createElement('button');
-      star.type = 'button';
-      star.className = 'star-btn active';
-      star.innerHTML = starIconSvg();
-      star.setAttribute('aria-label', '取消收藏');
-      star.addEventListener('click', () => toggleFavorite(code));
-
-      row.appendChild(main);
-      row.appendChild(valueEl);
-      row.appendChild(star);
-      els.favoriteList.appendChild(row);
-    });
+  function renderSubtitle() {
+    els.navSubtitle.textContent = orderedSelected().map((c) => CURRENCIES[c].name).join('・');
   }
 
   // ---------- Rate history & sparkline ----------
@@ -334,12 +272,21 @@
   }
 
   function renderSparkline() {
+    els.trendLabel.textContent = `匯率趨勢 · ${activeCurrency}`;
+    els.trendDelta.classList.remove('up', 'down');
+
+    if (activeCurrency === 'USD') {
+      els.sparklineLine.setAttribute('points', '');
+      els.sparklineFill.setAttribute('points', '');
+      els.trendDelta.textContent = '基準貨幣';
+      els.trendCaption.textContent = '美金是所有匯率的計算基準，沒有走勢可顯示';
+      return;
+    }
+
     const hist = loadHistory();
     const points = hist
-      .map((h) => ({ day: h.day, rate: h.rates[toCurrency] / h.rates[fromCurrency] }))
+      .map((h) => ({ day: h.day, rate: h.rates[activeCurrency] }))
       .filter((p) => isFinite(p.rate) && p.rate > 0);
-
-    els.trendDelta.classList.remove('up', 'down');
 
     if (points.length < 2) {
       els.sparklineLine.setAttribute('points', '');
@@ -376,168 +323,180 @@
     els.trendDelta.textContent = `${sign}${deltaPct.toFixed(1)}%`;
     els.trendDelta.classList.add(deltaPct >= 0 ? 'up' : 'down');
 
-    els.trendCaption.textContent = `${shortDate(points[0].day)} – ${shortDate(points[points.length - 1].day)}`;
+    els.trendCaption.textContent = `1 USD = ? ${activeCurrency} · ${shortDate(points[0].day)} – ${shortDate(points[points.length - 1].day)}`;
   }
 
   // ---------- Rendering orchestration ----------
 
   function renderAll() {
-    renderCurrencyMeta();
-    renderConversion();
+    renderConversions();
     renderQuickAmounts();
     renderStatus();
-    renderRecents();
-    renderFavorites();
+    renderSubtitle();
     renderSparkline();
   }
 
-  function setToCurrency(code) {
-    if (code === toCurrency) return;
-    if (code === fromCurrency) fromCurrency = toCurrency;
-    addRecent(toCurrency);
-    toCurrency = code;
-    persistPair();
-    renderAll();
+  function persistSelected() {
+    localStorage.setItem(LS_SELECTED, JSON.stringify(selected));
   }
 
-  function persistPair() {
-    localStorage.setItem(LS_FROM, fromCurrency);
-    localStorage.setItem(LS_TO, toCurrency);
+  function persistActive() {
+    localStorage.setItem(LS_ACTIVE, activeCurrency);
   }
 
-  function swapCurrencies() {
-    const rates = currentRates();
-    const amountUSD = fromAmount / rates[fromCurrency];
-    const newFromAmount = amountUSD * rates[toCurrency];
-    [fromCurrency, toCurrency] = [toCurrency, fromCurrency];
-    fromAmount = newFromAmount;
-    els.fromAmount.value = formatNumber(newFromAmount);
-    persistPair();
-    swapRotation += 180;
-    els.swapBtn.style.transform = `translateY(-50%) rotate(${swapRotation}deg)`;
-    renderAll();
+  // ---------- Amount input (event delegation, cards are rebuilt on demand) ----------
+
+  function activeInput() {
+    return els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
   }
 
-  // ---------- Amount input ----------
-
-  function previewFromAmount(raw) {
+  function previewActiveAmount(raw) {
     const val = parseFloat(String(raw).replace(/,/g, ''));
-    fromAmount = isFinite(val) ? val : 0;
-    renderConversion();
+    activeAmount = isFinite(val) ? val : 0;
+    renderConversions();
   }
 
-  function commitFromExpression() {
-    const result = parseExpression(els.fromAmount.value);
+  function commitActiveExpression() {
+    const input = activeInput();
+    if (!input) return;
+    const result = parseExpression(input.value);
     if (!isFinite(result)) return;
-    fromAmount = result;
-    els.fromAmount.value = formatNumber(result);
-    renderConversion();
+    activeAmount = result;
+    input.value = formatNumber(result);
+    renderConversions();
   }
 
-  els.fromAmount.addEventListener('input', () => previewFromAmount(els.fromAmount.value));
-  els.fromAmount.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      commitFromExpression();
-      els.fromAmount.blur();
-    }
+  els.cardList.addEventListener('focusin', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input) return;
+    activeCurrency = input.dataset.currency;
+    persistActive();
+    renderQuickAmounts();
+    renderConversions();
+    renderSparkline();
   });
-  els.fromAmount.addEventListener('blur', commitFromExpression);
+
+  els.cardList.addEventListener('input', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input) return;
+    previewActiveAmount(input.value);
+  });
+
+  els.cardList.addEventListener('keydown', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input || e.key !== 'Enter') return;
+    e.preventDefault();
+    commitActiveExpression();
+    input.blur();
+  });
+
+  els.cardList.addEventListener('focusout', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input || input.dataset.currency !== activeCurrency) return;
+    commitActiveExpression();
+  });
 
   els.calcToolbar.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-op]');
     if (!btn) return;
+    const input = activeInput();
+    if (!input) return;
     const op = btn.dataset.op;
     if (op === 'C') {
-      els.fromAmount.value = '';
-      previewFromAmount('');
+      input.value = '';
+      previewActiveAmount('');
     } else if (op === '=') {
-      commitFromExpression();
+      commitActiveExpression();
     } else {
-      els.fromAmount.value = (els.fromAmount.value || '') + op;
-      previewFromAmount(els.fromAmount.value);
+      input.value = (input.value || '') + op;
+      previewActiveAmount(input.value);
     }
-    els.fromAmount.focus();
+    input.focus();
   });
 
-  els.swapBtn.addEventListener('click', swapCurrencies);
+  // ---------- Manage currencies sheet ----------
 
-  // ---------- Currency picker sheet ----------
-
-  function openPicker(side) {
-    pickerSide = side;
-    els.pickerTitle.textContent = side === 'from' ? '選擇起始貨幣' : '選擇目標貨幣';
-    renderPickerList();
-    els.pickerOverlay.classList.remove('hidden');
+  function openManage() {
+    renderManageList();
+    els.manageOverlay.classList.remove('hidden');
   }
 
-  function closePicker() {
-    pickerSide = null;
-    els.pickerOverlay.classList.add('hidden');
+  function closeManage() {
+    els.manageOverlay.classList.add('hidden');
+    setActiveTab('convert');
   }
 
-  function renderPickerList() {
+  function renderManageList() {
+    els.manageCount.textContent = `已選 ${selected.length} / ${MAX_SELECTED} 種貨幣，首頁會依序顯示`;
     els.pickerList.innerHTML = '';
-    const activeCode = pickerSide === 'from' ? fromCurrency : toCurrency;
     CODES.forEach((code) => {
       const info = CURRENCIES[code];
-      const item = document.createElement('div');
-      item.className = 'picker-item' + (code === activeCode ? ' selected' : '');
-
-      const main = document.createElement('button');
-      main.type = 'button';
-      main.style.cssText = 'display:flex;align-items:center;gap:12px;flex:1;min-width:0;background:none;border:none;padding:0;cursor:pointer;text-align:left;color:inherit;';
-      main.innerHTML = `
+      const isSelected = selected.includes(code);
+      const atLimit = !isSelected && selected.length >= MAX_SELECTED;
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'picker-item' + (isSelected ? ' selected' : '') + (atLimit ? ' disabled' : '');
+      item.innerHTML = `
         <span class="currency-avatar">${info.flag}</span>
         <span class="currency-meta">
           <span class="currency-code">${code}</span>
           <span class="currency-name">${info.name}</span>
         </span>
         <svg class="picker-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4 10-10"/></svg>`;
-      main.addEventListener('click', () => {
-        if (pickerSide === 'from') {
-          if (code === toCurrency) toCurrency = fromCurrency;
-          fromCurrency = code;
-        } else {
-          if (code === fromCurrency) fromCurrency = toCurrency;
-          if (code !== toCurrency) addRecent(toCurrency);
-          toCurrency = code;
-        }
-        persistPair();
-        closePicker();
-        renderAll();
-      });
-
-      const star = document.createElement('button');
-      star.type = 'button';
-      star.className = 'picker-star' + (favorites.has(code) ? ' active' : '');
-      star.innerHTML = starIconSvg();
-      star.setAttribute('aria-label', favorites.has(code) ? '取消收藏' : '收藏');
-      star.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleFavorite(code);
-      });
-
-      item.appendChild(main);
-      item.appendChild(star);
+      item.addEventListener('click', () => toggleSelected(code));
       els.pickerList.appendChild(item);
     });
   }
 
-  els.fromRow.addEventListener('click', () => openPicker('from'));
-  els.toRow.addEventListener('click', () => openPicker('to'));
-  els.pickerClose.addEventListener('click', closePicker);
-  els.pickerOverlay.addEventListener('click', (e) => {
-    if (e.target === els.pickerOverlay) closePicker();
+  function toggleSelected(code) {
+    if (selected.includes(code)) {
+      if (selected.length <= 1) return;
+      const wasActive = activeCurrency === code;
+      const amountUSD = wasActive ? activeAmount / currentRates()[code] : null;
+      selected = selected.filter((c) => c !== code);
+      if (wasActive) {
+        activeCurrency = orderedSelected()[0];
+        activeAmount = amountUSD * currentRates()[activeCurrency];
+        persistActive();
+      }
+    } else {
+      if (selected.length >= MAX_SELECTED) return;
+      selected = [...selected, code];
+    }
+    persistSelected();
+    buildCards();
+    const input = activeInput();
+    if (input) input.value = formatNumber(activeAmount);
+    renderAll();
+    renderManageList();
+  }
+
+  els.manageBtn.addEventListener('click', openManage);
+  els.manageClose.addEventListener('click', closeManage);
+  els.manageOverlay.addEventListener('click', (e) => {
+    if (e.target === els.manageOverlay) closeManage();
   });
 
   // ---------- Settings sheet ----------
 
   function openSettings() {
     const rates = currentRates();
-    els.manualTWD.value = rates.TWD ? rates.TWD.toFixed(2) : '';
-    els.manualMNT.value = rates.MNT ? rates.MNT.toFixed(2) : '';
-    els.manualKRW.value = rates.KRW ? rates.KRW.toFixed(2) : '';
+    els.manualRows.innerHTML = '';
+    orderedSelected().filter((c) => c !== 'USD').forEach((code) => {
+      const info = CURRENCIES[code];
+      const row = document.createElement('div');
+      row.className = 'manual-row';
+      row.innerHTML = `
+        <label for="manual_${code}">1 USD = <span class="unit">${code}</span></label>
+        <input id="manual_${code}" type="text" inputmode="decimal" autocomplete="off" value="${rates[code] ? rates[code].toFixed(2) : ''}">`;
+      els.manualRows.appendChild(row);
+    });
+    if (!els.manualRows.children.length) {
+      const hint = document.createElement('p');
+      hint.className = 'settings-hint';
+      hint.textContent = '目前只選擇了美金，沒有其他幣別可以設定手動匯率。';
+      els.manualRows.appendChild(hint);
+    }
     els.settingsOverlay.classList.remove('hidden');
   }
 
@@ -547,14 +506,18 @@
   }
 
   function saveManualRates() {
-    const twd = parseFloat(els.manualTWD.value);
-    const mnt = parseFloat(els.manualMNT.value);
-    const krw = parseFloat(els.manualKRW.value);
-    if (![twd, mnt, krw].every((v) => isFinite(v) && v > 0)) {
-      alert('請輸入三個大於 0 的數字');
-      return;
+    const codes = orderedSelected().filter((c) => c !== 'USD');
+    const values = {};
+    for (const code of codes) {
+      const input = $(`manual_${code}`);
+      const v = parseFloat(input.value);
+      if (!isFinite(v) || v <= 0) {
+        alert('請輸入大於 0 的數字');
+        return;
+      }
+      values[code] = v;
     }
-    manualRates = { USD: 1, TWD: twd, MNT: mnt, KRW: krw };
+    manualRates = { ...(manualRates || {}), USD: 1, ...values };
     manualOn = true;
     localStorage.setItem(LS_MANUAL_RATES, JSON.stringify(manualRates));
     localStorage.setItem(LS_MANUAL_ON, '1');
@@ -588,14 +551,18 @@
     const btn = e.target.closest('.tab-btn');
     if (!btn) return;
     const tab = btn.dataset.tab;
+    if (tab === 'manage') {
+      setActiveTab('manage');
+      openManage();
+      return;
+    }
     if (tab === 'settings') {
       setActiveTab('settings');
       openSettings();
       return;
     }
     setActiveTab(tab);
-    const target = tab === 'favorites' ? $('favoriteSection') : els.scrollRoot;
-    target.scrollIntoView({ behavior: 'smooth', block: tab === 'favorites' ? 'start' : 'start' });
+    els.scrollRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   // ---------- Persisted state ----------
@@ -609,16 +576,15 @@
       if (mRates) manualRates = mRates;
       manualOn = localStorage.getItem(LS_MANUAL_ON) === '1';
 
-      const favs = JSON.parse(localStorage.getItem(LS_FAVORITES) || '[]');
-      favorites = new Set(favs.filter((c) => CODES.includes(c)));
+      const sel = JSON.parse(localStorage.getItem(LS_SELECTED) || 'null');
+      if (Array.isArray(sel) && sel.length) {
+        const filtered = sel.filter((c) => CODES.includes(c)).slice(0, MAX_SELECTED);
+        if (filtered.length) selected = filtered;
+      }
 
-      const rec = JSON.parse(localStorage.getItem(LS_RECENTS) || '[]');
-      recents = rec.filter((c) => CODES.includes(c));
-
-      const storedFrom = localStorage.getItem(LS_FROM);
-      const storedTo = localStorage.getItem(LS_TO);
-      if (storedFrom && CODES.includes(storedFrom)) fromCurrency = storedFrom;
-      if (storedTo && CODES.includes(storedTo) && storedTo !== fromCurrency) toCurrency = storedTo;
+      const storedActive = localStorage.getItem(LS_ACTIVE);
+      if (storedActive && selected.includes(storedActive)) activeCurrency = storedActive;
+      else activeCurrency = orderedSelected()[0];
     } catch (e) { /* corrupted storage, ignore and start fresh */ }
   }
 
@@ -679,7 +645,9 @@
 
   // --- init ---
   loadStoredState();
-  els.fromAmount.value = formatNumber(fromAmount);
+  buildCards();
+  const initInput = activeInput();
+  if (initInput) initInput.value = formatNumber(activeAmount);
   renderAll();
   fetchLiveRates();
 })();
