@@ -167,7 +167,9 @@
   // ---------- Card list ----------
 
   function orderedSelected() {
-    return CODES.filter((c) => selected.includes(c));
+    // `selected` is itself the user's display order (drag-reorderable),
+    // not filtered through CODES — insertion/drag order is authoritative.
+    return selected;
   }
 
   function buildCards() {
@@ -183,10 +185,114 @@
           <span class="currency-code">${code}</span>
           <span class="currency-name">${info.name}</span>
         </span>
-        <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="${code}" aria-label="${info.name}金額">`;
+        <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="${code}" aria-label="${info.name}金額">
+        <button class="drag-handle" type="button" tabindex="-1" aria-label="拖曳調整順序">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h10M7 16h10"/></svg>
+        </button>`;
       els.cardList.appendChild(card);
     });
   }
+
+  // ---------- Drag to reorder ----------
+
+  const GAP = 12;
+  let drag = null;
+
+  function beginDrag(handle, pointerId, clientY) {
+    const card = handle.closest('.currency-card');
+    const order = orderedSelected();
+    const index = order.indexOf(card.dataset.currency);
+    if (index === -1) return;
+
+    els.cardList.style.minHeight = `${els.cardList.offsetHeight}px`;
+    card.classList.add('dragging');
+    card.style.position = 'absolute';
+    card.style.left = '0';
+    card.style.right = '0';
+    card.style.top = `${card.offsetTop}px`;
+    card.style.zIndex = '50';
+    handle.setPointerCapture(pointerId);
+
+    drag = {
+      pointerId,
+      card,
+      handle,
+      order: [...order],
+      index,
+      startY: clientY,
+      slot: card.offsetHeight + GAP,
+      targetIndex: index,
+    };
+  }
+
+  function updateDrag(clientY) {
+    if (!drag) return;
+    const deltaY = clientY - drag.startY;
+    drag.card.style.transform = `translateY(${deltaY}px)`;
+
+    const shift = Math.round(deltaY / drag.slot);
+    const targetIndex = Math.min(Math.max(drag.index + shift, 0), drag.order.length - 1);
+    if (targetIndex === drag.targetIndex) return;
+    drag.targetIndex = targetIndex;
+
+    drag.order.forEach((code, i) => {
+      if (code === drag.card.dataset.currency) return;
+      const sibling = els.cardList.querySelector(`.currency-card[data-currency="${code}"]`);
+      if (!sibling) return;
+      let offset = 0;
+      if (drag.targetIndex > drag.index && i > drag.index && i <= drag.targetIndex) offset = -drag.slot;
+      else if (drag.targetIndex < drag.index && i >= drag.targetIndex && i < drag.index) offset = drag.slot;
+      sibling.style.transform = offset ? `translateY(${offset}px)` : '';
+    });
+  }
+
+  function endDrag() {
+    if (!drag) return;
+    const finalOrder = [...drag.order];
+    const [moved] = finalOrder.splice(drag.index, 1);
+    finalOrder.splice(drag.targetIndex, 0, moved);
+
+    els.cardList.querySelectorAll('.currency-card').forEach((card) => {
+      card.classList.remove('dragging');
+      card.style.position = '';
+      card.style.left = '';
+      card.style.right = '';
+      card.style.top = '';
+      card.style.zIndex = '';
+      card.style.transform = '';
+    });
+    els.cardList.style.minHeight = '';
+
+    if (finalOrder.join() !== selected.join()) {
+      selected = finalOrder;
+      persistSelected();
+    }
+    drag = null;
+    buildCards();
+    const input = activeInput();
+    if (input) input.value = formatNumber(activeAmount);
+    renderConversions();
+  }
+
+  els.cardList.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    e.preventDefault();
+    beginDrag(handle, e.pointerId, e.clientY);
+  });
+
+  els.cardList.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    e.preventDefault();
+    updateDrag(e.clientY);
+  });
+
+  ['pointerup', 'pointercancel'].forEach((evt) => {
+    els.cardList.addEventListener(evt, (e) => {
+      if (!drag || e.pointerId !== drag.pointerId) return;
+      endDrag();
+    });
+  });
 
   function renderConversions() {
     const rates = currentRates();

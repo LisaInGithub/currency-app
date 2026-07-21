@@ -189,6 +189,7 @@ svg {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
 }
 
 .currency-card {
@@ -198,7 +199,7 @@ svg {
   padding: 16px 18px;
   cursor: text;
   border-left: 6px solid transparent;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
 }
 
 .currency-card.active {
@@ -210,6 +211,31 @@ svg {
 .currency-card.active .currency-code {
   color: var(--primary-strong);
 }
+
+.currency-card.dragging {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  box-shadow: var(--shadow-float);
+  cursor: grabbing;
+}
+
+.drag-handle {
+  width: 28px;
+  height: 40px;
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  opacity: 0.55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.drag-handle svg { width: 18px; height: 18px; }
 
 .currency-avatar {
   width: 40px;
