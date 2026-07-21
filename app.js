@@ -1,15 +1,55 @@
 (() => {
-  const CURRENCIES = ['TWD', 'MNT', 'USD', 'KRW'];
+  const CURRENCIES = {
+    TWD: { name: '新台幣', flag: '🇹🇼' },
+    MNT: { name: '蒙圖', flag: '🇲🇳' },
+    USD: { name: '美金', flag: '🇺🇸' },
+    JPY: { name: '日圓', flag: '🇯🇵' },
+    KRW: { name: '韓元', flag: '🇰🇷' },
+    CNY: { name: '人民幣', flag: '🇨🇳' },
+    HKD: { name: '港幣', flag: '🇭🇰' },
+    EUR: { name: '歐元', flag: '🇪🇺' },
+    GBP: { name: '英鎊', flag: '🇬🇧' },
+    THB: { name: '泰銖', flag: '🇹🇭' },
+    VND: { name: '越南盾', flag: '🇻🇳' },
+    SGD: { name: '新加坡幣', flag: '🇸🇬' },
+    MYR: { name: '馬來西亞令吉', flag: '🇲🇾' },
+    PHP: { name: '菲律賓披索', flag: '🇵🇭' },
+    IDR: { name: '印尼盾', flag: '🇮🇩' },
+    AUD: { name: '澳幣', flag: '🇦🇺' },
+    CAD: { name: '加幣', flag: '🇨🇦' },
+    NZD: { name: '紐西蘭幣', flag: '🇳🇿' },
+  };
+  const CODES = Object.keys(CURRENCIES);
+  const DEFAULT_SELECTED = ['TWD', 'MNT', 'USD', 'KRW'];
+  const MAX_SELECTED = 5;
   const API_URL = 'https://open.er-api.com/v6/latest/USD';
 
   // Last-resort seed used only if there is no network AND no cache yet.
-  const FALLBACK_RATES = { USD: 1, TWD: 32.3, MNT: 3600, KRW: 1480 };
+  const FALLBACK_RATES = {
+    USD: 1, TWD: 32.3, MNT: 3600, JPY: 155, KRW: 1480, CNY: 7.2, HKD: 7.8,
+    EUR: 0.92, GBP: 0.78, THB: 36, VND: 25450, SGD: 1.34, MYR: 4.7, PHP: 58,
+    IDR: 16200, AUD: 1.52, CAD: 1.37, NZD: 1.65,
+  };
 
   const QUICK_AMOUNTS = {
     TWD: [100, 500, 1000, 5000],
     MNT: [1000, 5000, 10000, 50000],
     USD: [10, 50, 100, 500],
+    JPY: [1000, 5000, 10000, 50000],
     KRW: [1000, 10000, 50000, 100000],
+    CNY: [100, 500, 1000, 5000],
+    HKD: [100, 500, 1000, 5000],
+    EUR: [10, 50, 100, 500],
+    GBP: [10, 50, 100, 500],
+    THB: [100, 500, 1000, 5000],
+    VND: [50000, 100000, 500000, 1000000],
+    SGD: [10, 50, 100, 500],
+    MYR: [50, 100, 500, 1000],
+    PHP: [100, 500, 1000, 5000],
+    IDR: [50000, 100000, 500000, 1000000],
+    AUD: [10, 50, 100, 500],
+    CAD: [10, 50, 100, 500],
+    NZD: [10, 50, 100, 500],
   };
 
   const LS_LIVE_RATES = 'cc_live_rates';
@@ -17,47 +57,60 @@
   const LS_MANUAL_RATES = 'cc_manual_rates';
   const LS_MANUAL_ON = 'cc_manual_on';
   const LS_INSTALL_DISMISSED = 'cc_install_dismissed';
+  const LS_SELECTED = 'cc_selected_currencies';
+  const LS_ACTIVE = 'cc_active_currency';
+  const LS_RATE_HISTORY = 'cc_rate_history';
+  const LS_THEME = 'cc_theme';
+
+  const HISTORY_MAX_DAYS = 30;
+
+  const $ = (id) => document.getElementById(id);
 
   const els = {
-    statusBadge: document.getElementById('statusBadge'),
-    statusDot: document.getElementById('statusDot'),
-    statusText: document.getElementById('statusText'),
-    offlineBanner: document.getElementById('offlineBanner'),
-    quickAmounts: document.getElementById('quickAmounts'),
-    manualToggle: document.getElementById('manualToggle'),
-    manualPanel: document.getElementById('manualPanel'),
-    manualTWD: document.getElementById('manualTWD'),
-    manualMNT: document.getElementById('manualMNT'),
-    manualKRW: document.getElementById('manualKRW'),
-    manualSave: document.getElementById('manualSave'),
-    manualReset: document.getElementById('manualReset'),
-    lastUpdated: document.getElementById('lastUpdated'),
-    installToast: document.getElementById('installToast'),
-    installBtn: document.getElementById('installBtn'),
-    installDismiss: document.getElementById('installDismiss'),
-    calcToolbar: document.getElementById('calcToolbar'),
+    navSubtitle: $('navSubtitle'),
+    statusBadge: $('statusBadge'),
+    statusText: $('statusText'),
+    offlineBanner: $('offlineBanner'),
+    cardList: $('cardList'),
+    manageBtn: $('manageBtn'),
+    calcToolbar: $('calcToolbar'),
+    quickAmounts: $('quickAmounts'),
+    trendLabel: $('trendLabel'),
+    trendDelta: $('trendDelta'),
+    trendCaption: $('trendCaption'),
+    sparklineLine: $('sparklineLine'),
+    sparklineFill: $('sparklineFill'),
+    lastUpdated: $('lastUpdated'),
+    scrollRoot: $('scrollRoot'),
+    tabBar: $('tabBar'),
+    manageOverlay: $('manageOverlay'),
+    manageCount: $('manageCount'),
+    pickerList: $('pickerList'),
+    manageClose: $('manageClose'),
+    settingsOverlay: $('settingsOverlay'),
+    settingsClose: $('settingsClose'),
+    manualRows: $('manualRows'),
+    manualSave: $('manualSave'),
+    manualReset: $('manualReset'),
+    installToast: $('installToast'),
+    installBtn: $('installBtn'),
+    installDismiss: $('installDismiss'),
+    themeToggle: $('themeToggle'),
   };
-
-  const inputs = {};
-  CURRENCIES.forEach((c) => {
-    inputs[c] = document.querySelector(`.card-input[data-currency="${c}"]`);
-  });
-  const cards = {};
-  CURRENCIES.forEach((c) => {
-    cards[c] = document.querySelector(`.card[data-currency="${c}"]`);
-  });
 
   let liveRates = null;
   let liveTime = null;
   let manualRates = null;
   let manualOn = false;
+  let selected = [...DEFAULT_SELECTED];
   let activeCurrency = 'TWD';
   let activeAmount = 1000;
 
   function currentRates() {
-    if (manualOn && manualRates) return manualRates;
-    if (liveRates) return liveRates;
-    return FALLBACK_RATES;
+    const merged = { ...FALLBACK_RATES };
+    if (liveRates) Object.assign(merged, liveRates);
+    if (manualOn && manualRates) Object.assign(merged, manualRates);
+    return merged;
   }
 
   function formatNumber(n) {
@@ -111,27 +164,158 @@
     return result;
   }
 
+  // ---------- Card list ----------
+
+  function orderedSelected() {
+    // `selected` is itself the user's display order (drag-reorderable),
+    // not filtered through CODES — insertion/drag order is authoritative.
+    return selected;
+  }
+
+  function buildCards() {
+    els.cardList.innerHTML = '';
+    orderedSelected().forEach((code) => {
+      const info = CURRENCIES[code];
+      const card = document.createElement('section');
+      card.className = 'card currency-card';
+      card.dataset.currency = code;
+      card.innerHTML = `
+        <span class="currency-avatar">${info.flag}</span>
+        <span class="currency-meta">
+          <span class="currency-code">${code}</span>
+          <span class="currency-name">${info.name}</span>
+        </span>
+        <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="${code}" aria-label="${info.name}金額">
+        <button class="drag-handle" type="button" tabindex="-1" aria-label="拖曳調整順序">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h10M7 16h10"/></svg>
+        </button>`;
+      els.cardList.appendChild(card);
+    });
+  }
+
+  // ---------- Drag to reorder ----------
+
+  const GAP = 12;
+  let drag = null;
+
+  function beginDrag(handle, pointerId, clientY) {
+    const card = handle.closest('.currency-card');
+    const order = orderedSelected();
+    const index = order.indexOf(card.dataset.currency);
+    if (index === -1) return;
+
+    els.cardList.style.minHeight = `${els.cardList.offsetHeight}px`;
+    card.classList.add('dragging');
+    card.style.position = 'absolute';
+    card.style.left = '0';
+    card.style.right = '0';
+    card.style.top = `${card.offsetTop}px`;
+    card.style.zIndex = '50';
+    handle.setPointerCapture(pointerId);
+
+    drag = {
+      pointerId,
+      card,
+      handle,
+      order: [...order],
+      index,
+      startY: clientY,
+      slot: card.offsetHeight + GAP,
+      targetIndex: index,
+    };
+  }
+
+  function updateDrag(clientY) {
+    if (!drag) return;
+    const deltaY = clientY - drag.startY;
+    drag.card.style.transform = `translateY(${deltaY}px)`;
+
+    const shift = Math.round(deltaY / drag.slot);
+    const targetIndex = Math.min(Math.max(drag.index + shift, 0), drag.order.length - 1);
+    if (targetIndex === drag.targetIndex) return;
+    drag.targetIndex = targetIndex;
+
+    drag.order.forEach((code, i) => {
+      if (code === drag.card.dataset.currency) return;
+      const sibling = els.cardList.querySelector(`.currency-card[data-currency="${code}"]`);
+      if (!sibling) return;
+      let offset = 0;
+      if (drag.targetIndex > drag.index && i > drag.index && i <= drag.targetIndex) offset = -drag.slot;
+      else if (drag.targetIndex < drag.index && i >= drag.targetIndex && i < drag.index) offset = drag.slot;
+      sibling.style.transform = offset ? `translateY(${offset}px)` : '';
+    });
+  }
+
+  function endDrag() {
+    if (!drag) return;
+    const finalOrder = [...drag.order];
+    const [moved] = finalOrder.splice(drag.index, 1);
+    finalOrder.splice(drag.targetIndex, 0, moved);
+
+    els.cardList.querySelectorAll('.currency-card').forEach((card) => {
+      card.classList.remove('dragging');
+      card.style.position = '';
+      card.style.left = '';
+      card.style.right = '';
+      card.style.top = '';
+      card.style.zIndex = '';
+      card.style.transform = '';
+    });
+    els.cardList.style.minHeight = '';
+
+    if (finalOrder.join() !== selected.join()) {
+      selected = finalOrder;
+      persistSelected();
+    }
+    drag = null;
+    buildCards();
+    const input = activeInput();
+    if (input) input.value = formatNumber(activeAmount);
+    renderConversions();
+  }
+
+  els.cardList.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    e.preventDefault();
+    beginDrag(handle, e.pointerId, e.clientY);
+  });
+
+  els.cardList.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    e.preventDefault();
+    updateDrag(e.clientY);
+  });
+
+  ['pointerup', 'pointercancel'].forEach((evt) => {
+    els.cardList.addEventListener(evt, (e) => {
+      if (!drag || e.pointerId !== drag.pointerId) return;
+      endDrag();
+    });
+  });
+
   function renderConversions() {
     const rates = currentRates();
-    const base = activeCurrency;
-    const amountUSD = activeAmount / rates[base];
-    CURRENCIES.forEach((c) => {
-      cards[c].classList.toggle('active', c === base);
-      if (c === base) return;
-      const value = amountUSD * rates[c];
-      inputs[c].value = formatNumber(value);
+    const amountUSD = activeAmount / rates[activeCurrency];
+    els.cardList.querySelectorAll('.currency-card').forEach((card) => {
+      const code = card.dataset.currency;
+      card.classList.toggle('active', code === activeCurrency);
+      if (code === activeCurrency) return;
+      const input = card.querySelector('.amount-input');
+      input.value = formatNumber(amountUSD * rates[code]);
     });
   }
 
   function renderQuickAmounts() {
     els.quickAmounts.innerHTML = '';
-    QUICK_AMOUNTS[activeCurrency].forEach((amt) => {
+    (QUICK_AMOUNTS[activeCurrency] || [10, 50, 100, 500]).forEach((amt) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = formatNumber(amt);
       btn.addEventListener('click', () => {
         activeAmount = amt;
-        inputs[activeCurrency].value = formatNumber(amt);
+        const input = els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
+        if (input) input.value = formatNumber(amt);
         renderConversions();
       });
       els.quickAmounts.appendChild(btn);
@@ -142,12 +326,12 @@
     els.statusBadge.classList.remove('manual', 'offline');
     if (manualOn) {
       els.statusBadge.classList.add('manual');
-      els.statusText.textContent = '✏️ 手動匯率';
+      els.statusText.textContent = '手動匯率';
     } else if (liveRates) {
-      els.statusText.textContent = '🟢 即時匯率';
+      els.statusText.textContent = '即時匯率';
     } else {
       els.statusBadge.classList.add('offline');
-      els.statusText.textContent = '📦 預設參考匯率';
+      els.statusText.textContent = '預設參考匯率';
     }
 
     const showOffline = !manualOn && !liveRates;
@@ -164,11 +348,332 @@
     }
   }
 
+  function renderSubtitle() {
+    els.navSubtitle.textContent = orderedSelected().map((c) => CURRENCIES[c].name).join('・');
+  }
+
+  // ---------- Rate history & sparkline ----------
+
+  function loadHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(LS_RATE_HISTORY) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function recordHistorySnapshot(rates, t) {
+    let hist = loadHistory();
+    const day = new Date(t).toISOString().slice(0, 10);
+    const idx = hist.findIndex((h) => h.day === day);
+    const entry = { day, t, rates };
+    if (idx >= 0) hist[idx] = entry;
+    else hist.push(entry);
+    hist = hist.filter((h) => t - h.t < 1000 * 60 * 60 * 24 * HISTORY_MAX_DAYS);
+    hist.sort((a, b) => a.t - b.t);
+    localStorage.setItem(LS_RATE_HISTORY, JSON.stringify(hist));
+  }
+
+  function shortDate(day) {
+    const d = new Date(`${day}T00:00:00`);
+    return d.toLocaleDateString('zh-Hant-TW', { month: 'numeric', day: 'numeric' });
+  }
+
+  function renderSparkline() {
+    els.trendLabel.textContent = `匯率趨勢 · ${activeCurrency}`;
+    els.trendDelta.classList.remove('up', 'down');
+
+    if (activeCurrency === 'USD') {
+      els.sparklineLine.setAttribute('points', '');
+      els.sparklineFill.setAttribute('points', '');
+      els.trendDelta.textContent = '基準貨幣';
+      els.trendCaption.textContent = '美金是所有匯率的計算基準，沒有走勢可顯示';
+      return;
+    }
+
+    const hist = loadHistory();
+    const points = hist
+      .map((h) => ({ day: h.day, rate: h.rates[activeCurrency] }))
+      .filter((p) => isFinite(p.rate) && p.rate > 0);
+
+    if (points.length < 2) {
+      els.sparklineLine.setAttribute('points', '');
+      els.sparklineFill.setAttribute('points', '');
+      els.trendDelta.textContent = '累積中';
+      els.trendCaption.textContent = '持續使用旅行貨幣，即可累積屬於你的匯率走勢';
+      return;
+    }
+
+    const W = 300;
+    const H = 72;
+    const PAD = 6;
+    const values = points.map((p) => p.rate);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min || max * 0.01 || 1;
+
+    const coords = points.map((p, i) => {
+      const x = points.length === 1 ? 0 : (i / (points.length - 1)) * W;
+      const y = PAD + (1 - (p.rate - min) / span) * (H - PAD * 2);
+      return [x, y];
+    });
+
+    const linePoints = coords.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    els.sparklineLine.setAttribute('points', linePoints);
+
+    const fillPoints = `0,${H} ${linePoints} ${W},${H}`;
+    els.sparklineFill.setAttribute('points', fillPoints);
+
+    const first = points[0].rate;
+    const last = points[points.length - 1].rate;
+    const deltaPct = ((last - first) / first) * 100;
+    const sign = deltaPct > 0 ? '+' : '';
+    els.trendDelta.textContent = `${sign}${deltaPct.toFixed(1)}%`;
+    els.trendDelta.classList.add(deltaPct >= 0 ? 'up' : 'down');
+
+    els.trendCaption.textContent = `1 USD = ? ${activeCurrency} · ${shortDate(points[0].day)} – ${shortDate(points[points.length - 1].day)}`;
+  }
+
+  // ---------- Rendering orchestration ----------
+
   function renderAll() {
-    renderStatus();
+    renderConversions();
     renderQuickAmounts();
+    renderStatus();
+    renderSubtitle();
+    renderSparkline();
+  }
+
+  function persistSelected() {
+    localStorage.setItem(LS_SELECTED, JSON.stringify(selected));
+  }
+
+  function persistActive() {
+    localStorage.setItem(LS_ACTIVE, activeCurrency);
+  }
+
+  // ---------- Amount input (event delegation, cards are rebuilt on demand) ----------
+
+  function activeInput() {
+    return els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
+  }
+
+  function previewActiveAmount(raw) {
+    const val = parseFloat(String(raw).replace(/,/g, ''));
+    activeAmount = isFinite(val) ? val : 0;
     renderConversions();
   }
+
+  function commitActiveExpression() {
+    const input = activeInput();
+    if (!input) return;
+    const result = parseExpression(input.value);
+    if (!isFinite(result)) return;
+    activeAmount = result;
+    input.value = formatNumber(result);
+    renderConversions();
+  }
+
+  els.cardList.addEventListener('focusin', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input) return;
+    activeCurrency = input.dataset.currency;
+    persistActive();
+    renderQuickAmounts();
+    renderConversions();
+    renderSparkline();
+  });
+
+  els.cardList.addEventListener('input', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input) return;
+    previewActiveAmount(input.value);
+  });
+
+  els.cardList.addEventListener('keydown', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input || e.key !== 'Enter') return;
+    e.preventDefault();
+    commitActiveExpression();
+    input.blur();
+  });
+
+  els.cardList.addEventListener('focusout', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input || input.dataset.currency !== activeCurrency) return;
+    commitActiveExpression();
+  });
+
+  els.calcToolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-op]');
+    if (!btn) return;
+    const input = activeInput();
+    if (!input) return;
+    const op = btn.dataset.op;
+    if (op === 'C') {
+      input.value = '';
+      previewActiveAmount('');
+    } else if (op === '=') {
+      commitActiveExpression();
+    } else {
+      input.value = (input.value || '') + op;
+      previewActiveAmount(input.value);
+    }
+    input.focus();
+  });
+
+  // ---------- Manage currencies sheet ----------
+
+  function openManage() {
+    renderManageList();
+    els.manageOverlay.classList.remove('hidden');
+  }
+
+  function closeManage() {
+    els.manageOverlay.classList.add('hidden');
+    setActiveTab('convert');
+  }
+
+  function renderManageList() {
+    els.manageCount.textContent = `已選 ${selected.length} / ${MAX_SELECTED} 種貨幣，首頁會依序顯示`;
+    els.pickerList.innerHTML = '';
+    CODES.forEach((code) => {
+      const info = CURRENCIES[code];
+      const isSelected = selected.includes(code);
+      const atLimit = !isSelected && selected.length >= MAX_SELECTED;
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'picker-item' + (isSelected ? ' selected' : '') + (atLimit ? ' disabled' : '');
+      item.innerHTML = `
+        <span class="currency-avatar">${info.flag}</span>
+        <span class="currency-meta">
+          <span class="currency-code">${code}</span>
+          <span class="currency-name">${info.name}</span>
+        </span>
+        <svg class="picker-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4 10-10"/></svg>`;
+      item.addEventListener('click', () => toggleSelected(code));
+      els.pickerList.appendChild(item);
+    });
+  }
+
+  function toggleSelected(code) {
+    if (selected.includes(code)) {
+      if (selected.length <= 1) return;
+      const wasActive = activeCurrency === code;
+      const amountUSD = wasActive ? activeAmount / currentRates()[code] : null;
+      selected = selected.filter((c) => c !== code);
+      if (wasActive) {
+        activeCurrency = orderedSelected()[0];
+        activeAmount = amountUSD * currentRates()[activeCurrency];
+        persistActive();
+      }
+    } else {
+      if (selected.length >= MAX_SELECTED) return;
+      selected = [...selected, code];
+    }
+    persistSelected();
+    buildCards();
+    const input = activeInput();
+    if (input) input.value = formatNumber(activeAmount);
+    renderAll();
+    renderManageList();
+  }
+
+  els.manageBtn.addEventListener('click', openManage);
+  els.manageClose.addEventListener('click', closeManage);
+  els.manageOverlay.addEventListener('click', (e) => {
+    if (e.target === els.manageOverlay) closeManage();
+  });
+
+  // ---------- Settings sheet ----------
+
+  function openSettings() {
+    const rates = currentRates();
+    els.manualRows.innerHTML = '';
+    orderedSelected().filter((c) => c !== 'USD').forEach((code) => {
+      const info = CURRENCIES[code];
+      const row = document.createElement('div');
+      row.className = 'manual-row';
+      row.innerHTML = `
+        <label for="manual_${code}">1 USD = <span class="unit">${code}</span></label>
+        <input id="manual_${code}" type="text" inputmode="decimal" autocomplete="off" value="${rates[code] ? rates[code].toFixed(2) : ''}">`;
+      els.manualRows.appendChild(row);
+    });
+    if (!els.manualRows.children.length) {
+      const hint = document.createElement('p');
+      hint.className = 'settings-hint';
+      hint.textContent = '目前只選擇了美金，沒有其他幣別可以設定手動匯率。';
+      els.manualRows.appendChild(hint);
+    }
+    els.settingsOverlay.classList.remove('hidden');
+  }
+
+  function closeSettings() {
+    els.settingsOverlay.classList.add('hidden');
+    setActiveTab('convert');
+  }
+
+  function saveManualRates() {
+    const codes = orderedSelected().filter((c) => c !== 'USD');
+    const values = {};
+    for (const code of codes) {
+      const input = $(`manual_${code}`);
+      const v = parseFloat(input.value);
+      if (!isFinite(v) || v <= 0) {
+        alert('請輸入大於 0 的數字');
+        return;
+      }
+      values[code] = v;
+    }
+    manualRates = { ...(manualRates || {}), USD: 1, ...values };
+    manualOn = true;
+    localStorage.setItem(LS_MANUAL_RATES, JSON.stringify(manualRates));
+    localStorage.setItem(LS_MANUAL_ON, '1');
+    closeSettings();
+    renderAll();
+  }
+
+  function resetManualRates() {
+    manualOn = false;
+    localStorage.setItem(LS_MANUAL_ON, '0');
+    closeSettings();
+    renderAll();
+  }
+
+  els.settingsClose.addEventListener('click', closeSettings);
+  els.settingsOverlay.addEventListener('click', (e) => {
+    if (e.target === els.settingsOverlay) closeSettings();
+  });
+  els.manualSave.addEventListener('click', saveManualRates);
+  els.manualReset.addEventListener('click', resetManualRates);
+
+  // ---------- Tab bar ----------
+
+  function setActiveTab(tab) {
+    els.tabBar.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+  }
+
+  els.tabBar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    const tab = btn.dataset.tab;
+    if (tab === 'manage') {
+      setActiveTab('manage');
+      openManage();
+      return;
+    }
+    if (tab === 'settings') {
+      setActiveTab('settings');
+      openSettings();
+      return;
+    }
+    setActiveTab(tab);
+    els.scrollRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ---------- Persisted state ----------
 
   function loadStoredState() {
     try {
@@ -178,6 +683,16 @@
       const mRates = JSON.parse(localStorage.getItem(LS_MANUAL_RATES) || 'null');
       if (mRates) manualRates = mRates;
       manualOn = localStorage.getItem(LS_MANUAL_ON) === '1';
+
+      const sel = JSON.parse(localStorage.getItem(LS_SELECTED) || 'null');
+      if (Array.isArray(sel) && sel.length) {
+        const filtered = sel.filter((c) => CODES.includes(c)).slice(0, MAX_SELECTED);
+        if (filtered.length) selected = filtered;
+      }
+
+      const storedActive = localStorage.getItem(LS_ACTIVE);
+      if (storedActive && selected.includes(storedActive)) activeCurrency = storedActive;
+      else activeCurrency = orderedSelected()[0];
     } catch (e) { /* corrupted storage, ignore and start fresh */ }
   }
 
@@ -190,123 +705,23 @@
       if (!res.ok) throw new Error('bad response');
       const data = await res.json();
       const rates = { USD: 1 };
-      CURRENCIES.forEach((c) => {
+      CODES.forEach((c) => {
         if (c !== 'USD' && data.rates && typeof data.rates[c] === 'number') {
           rates[c] = data.rates[c];
         }
       });
-      if (Object.keys(rates).length < CURRENCIES.length) throw new Error('missing currency');
+      if (Object.keys(rates).length < CODES.length) throw new Error('missing currency');
       liveRates = rates;
       liveTime = Date.now();
       localStorage.setItem(LS_LIVE_RATES, JSON.stringify(rates));
       localStorage.setItem(LS_LIVE_TIME, String(liveTime));
+      recordHistorySnapshot(rates, liveTime);
     } catch (e) {
       // network unavailable or API error — keep whatever was loaded from cache
     } finally {
       renderAll();
     }
   }
-
-  function openManualPanel() {
-    const rates = currentRates();
-    els.manualTWD.value = rates.TWD ? rates.TWD.toFixed(2) : '';
-    els.manualMNT.value = rates.MNT ? rates.MNT.toFixed(2) : '';
-    els.manualKRW.value = rates.KRW ? rates.KRW.toFixed(2) : '';
-    els.manualPanel.classList.remove('hidden');
-  }
-
-  function saveManualRates() {
-    const twd = parseFloat(els.manualTWD.value);
-    const mnt = parseFloat(els.manualMNT.value);
-    const krw = parseFloat(els.manualKRW.value);
-    if (![twd, mnt, krw].every((v) => isFinite(v) && v > 0)) {
-      alert('請輸入三個大於 0 的數字');
-      return;
-    }
-    manualRates = { USD: 1, TWD: twd, MNT: mnt, KRW: krw };
-    manualOn = true;
-    localStorage.setItem(LS_MANUAL_RATES, JSON.stringify(manualRates));
-    localStorage.setItem(LS_MANUAL_ON, '1');
-    els.manualPanel.classList.add('hidden');
-    renderAll();
-  }
-
-  function resetManualRates() {
-    manualOn = false;
-    localStorage.setItem(LS_MANUAL_ON, '0');
-    els.manualPanel.classList.add('hidden');
-    renderAll();
-  }
-
-  // While typing (including a half-finished expression like "120+3"), preview
-  // using the numeric prefix only; the full expression is resolved on commit.
-  function previewActiveInput(c, raw) {
-    activeCurrency = c;
-    const val = parseFloat(String(raw).replace(/,/g, ''));
-    activeAmount = isFinite(val) ? val : 0;
-    cards[c].classList.add('active');
-    Object.keys(cards).forEach((k) => { if (k !== c) cards[k].classList.remove('active'); });
-    const rates = currentRates();
-    const amountUSD = activeAmount / rates[activeCurrency];
-    CURRENCIES.forEach((k) => {
-      if (k === c) return;
-      inputs[k].value = formatNumber(amountUSD * rates[k]);
-    });
-  }
-
-  function commitActiveExpression() {
-    const el = inputs[activeCurrency];
-    const result = parseExpression(el.value);
-    if (!isFinite(result)) return;
-    activeAmount = result;
-    el.value = formatNumber(result);
-    renderConversions();
-  }
-
-  CURRENCIES.forEach((c) => {
-    inputs[c].addEventListener('focus', () => {
-      activeCurrency = c;
-      renderQuickAmounts();
-      renderConversions();
-    });
-    inputs[c].addEventListener('input', () => {
-      previewActiveInput(c, inputs[c].value);
-    });
-    inputs[c].addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        activeCurrency = c;
-        commitActiveExpression();
-      }
-    });
-    inputs[c].addEventListener('blur', () => {
-      if (activeCurrency === c) commitActiveExpression();
-    });
-  });
-
-  els.calcToolbar.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-op]');
-    if (!btn) return;
-    const op = btn.dataset.op;
-    const el = inputs[activeCurrency];
-    if (op === 'C') {
-      el.value = '';
-      previewActiveInput(activeCurrency, '');
-    } else if (op === '=') {
-      commitActiveExpression();
-    } else {
-      el.value = (el.value || '') + op;
-      previewActiveInput(activeCurrency, el.value);
-    }
-    el.focus();
-  });
-
-  els.manualToggle.addEventListener('click', () => {
-    if (els.manualPanel.classList.contains('hidden')) openManualPanel();
-    else els.manualPanel.classList.add('hidden');
-  });
-  els.manualSave.addEventListener('click', saveManualRates);
-  els.manualReset.addEventListener('click', resetManualRates);
 
   // --- PWA install prompt ---
   let deferredInstallEvent = null;
@@ -336,9 +751,31 @@
     });
   }
 
+  // ---------- Theme (light/dark toggle, overrides the system default) ----------
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function initTheme() {
+    const stored = localStorage.getItem(LS_THEME);
+    if (stored === 'dark' || stored === 'light') applyTheme(stored);
+  }
+
+  els.themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+      || (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(LS_THEME, next);
+  });
+
   // --- init ---
+  initTheme();
   loadStoredState();
-  inputs[activeCurrency].value = formatNumber(activeAmount);
+  buildCards();
+  const initInput = activeInput();
+  if (initInput) initInput.value = formatNumber(activeAmount);
   renderAll();
   fetchLiveRates();
 })();
