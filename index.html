@@ -15,8 +15,21 @@
 <div class="app" id="scrollRoot">
 
   <header class="nav">
-    <h1 class="nav-title">旅行貨幣</h1>
-    <p class="nav-subtitle" id="navSubtitle">載入中…</p>
+    <div class="nav-top">
+      <div>
+        <h1 class="nav-title">旅行貨幣</h1>
+        <p class="nav-subtitle" id="navSubtitle">載入中…</p>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="切換明亮／暗黑模式">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M18.4 18.4l-2.1-2.1M7.7 7.7 5.6 5.6"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>
+        </svg>
+      </button>
+    </div>
     <button id="statusBadge" class="status-badge" type="button">
       <span id="statusDot" class="status-dot"></span>
       <span id="statusText">載入匯率中…</span>

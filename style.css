@@ -71,6 +71,13 @@ svg {
   padding: 8px 4px 20px;
 }
 
+.nav-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .nav-title {
   font-size: 32px;
   font-weight: 700;
@@ -83,6 +90,36 @@ svg {
   margin: 0 0 14px;
   font-size: 15px;
   color: var(--text-secondary);
+}
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--divider);
+  background: var(--surface);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s var(--ease-spring), background-color 0.2s ease;
+}
+
+.theme-toggle:active { transform: scale(0.92); }
+
+.theme-toggle svg { width: 19px; height: 19px; }
+
+.theme-toggle .icon-moon { display: none; }
+
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: none; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: block; }
 }
 
 .status-badge {
@@ -160,13 +197,18 @@ svg {
   gap: 14px;
   padding: 16px 18px;
   cursor: text;
-  border-left: 4px solid transparent;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  border-left: 6px solid transparent;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 
 .currency-card.active {
   border-left-color: var(--primary);
-  box-shadow: var(--shadow-float);
+  background-color: rgba(246, 178, 107, 0.1);
+  box-shadow: 0 0 0 1.5px rgba(246, 178, 107, 0.5), var(--shadow-float);
+}
+
+.currency-card.active .currency-code {
+  color: var(--primary-strong);
 }
 
 .currency-avatar {
@@ -677,10 +719,13 @@ svg {
   gap: 10px;
 }
 
-/* ---------- Dark mode ---------- */
+/* ---------- Dark mode ----------
+   Three tiers: this media query follows the OS when the user hasn't
+   picked explicitly; the data-theme rules below always win once they
+   have, in either direction. */
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg-top: #221C16;
     --bg-bottom: #1A1510;
     --surface: #2C241C;
@@ -697,11 +742,40 @@ svg {
     --danger-bg: rgba(248, 166, 166, 0.14);
   }
 
-  .amount-input::placeholder { color: #4A3F30; }
-  .banner { background: rgba(249, 201, 122, 0.1); }
-  .trend-delta { background: rgba(255, 255, 255, 0.06); }
-  .manual-row input { background: #221C16; }
-  .tab-bar { background: rgba(44, 36, 28, 0.72); border-color: rgba(255,255,255,0.08); }
-  .sheet-close, .settings-block, .currency-avatar { background: #221C16; }
-  .btn-primary { color: #221C16; }
+  :root:not([data-theme="light"]) .amount-input::placeholder { color: #4A3F30; }
+  :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.1); }
+  :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.06); }
+  :root:not([data-theme="light"]) .manual-row input { background: #221C16; }
+  :root:not([data-theme="light"]) .tab-bar { background: rgba(44, 36, 28, 0.72); border-color: rgba(255,255,255,0.08); }
+  :root:not([data-theme="light"]) .sheet-close,
+  :root:not([data-theme="light"]) .settings-block,
+  :root:not([data-theme="light"]) .currency-avatar { background: #221C16; }
+  :root:not([data-theme="light"]) .btn-primary { color: #221C16; }
 }
+
+:root[data-theme="dark"] {
+  --bg-top: #221C16;
+  --bg-bottom: #1A1510;
+  --surface: #2C241C;
+  --card: #2C241C;
+  --divider: #3C3226;
+  --text-primary: #F5EBE0;
+  --text-secondary: #B7A692;
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --success-ink: #A9E0BE;
+  --success-bg: rgba(143, 211, 167, 0.14);
+  --warning-ink: #F4CE8B;
+  --danger-ink: #F5BFBF;
+  --danger-bg: rgba(248, 166, 166, 0.14);
+}
+
+:root[data-theme="dark"] .amount-input::placeholder { color: #4A3F30; }
+:root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.1); }
+:root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.06); }
+:root[data-theme="dark"] .manual-row input { background: #221C16; }
+:root[data-theme="dark"] .tab-bar { background: rgba(44, 36, 28, 0.72); border-color: rgba(255,255,255,0.08); }
+:root[data-theme="dark"] .sheet-close,
+:root[data-theme="dark"] .settings-block,
+:root[data-theme="dark"] .currency-avatar { background: #221C16; }
+:root[data-theme="dark"] .btn-primary { color: #221C16; }

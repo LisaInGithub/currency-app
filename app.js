@@ -60,6 +60,7 @@
   const LS_SELECTED = 'cc_selected_currencies';
   const LS_ACTIVE = 'cc_active_currency';
   const LS_RATE_HISTORY = 'cc_rate_history';
+  const LS_THEME = 'cc_theme';
 
   const HISTORY_MAX_DAYS = 30;
 
@@ -94,6 +95,7 @@
     installToast: $('installToast'),
     installBtn: $('installBtn'),
     installDismiss: $('installDismiss'),
+    themeToggle: $('themeToggle'),
   };
 
   let liveRates = null;
@@ -643,7 +645,27 @@
     });
   }
 
+  // ---------- Theme (light/dark toggle, overrides the system default) ----------
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function initTheme() {
+    const stored = localStorage.getItem(LS_THEME);
+    if (stored === 'dark' || stored === 'light') applyTheme(stored);
+  }
+
+  els.themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+      || (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(LS_THEME, next);
+  });
+
   // --- init ---
+  initTheme();
   loadStoredState();
   buildCards();
   const initInput = activeInput();
