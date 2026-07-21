@@ -3,11 +3,11 @@
   --primary-strong: #EF9B4E;
   --secondary: #FFD9B3;
   --accent: #FFB87A;
-  --bg-top: #FFFDFB;
-  --bg-bottom: #FFF6ED;
-  --surface: #FFFFFF;
-  --card: #FFFFFF;
-  --divider: #F2E8DF;
+  --bg-top: #F7EEE1;
+  --bg-bottom: #EEE0C9;
+  --surface: #FBF4E9;
+  --card: #FBF4E9;
+  --divider: #E4D3B8;
   --success: #8FD3A7;
   --success-ink: #4E8F68;
   --success-bg: #EAF7EF;
@@ -126,7 +126,7 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(251, 244, 233, 0.7);
   border: 1px solid var(--divider);
   border-radius: 999px;
   padding: 7px 14px;
@@ -470,10 +470,10 @@ svg {
   margin-bottom: calc(16px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(251, 244, 233, 0.72);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(251, 244, 233, 0.6);
   border-radius: 26px;
   padding: 8px;
   box-shadow: var(--shadow-float);
@@ -662,7 +662,7 @@ svg {
   border: 1px solid var(--divider);
   border-radius: 10px;
   padding: 8px 10px;
-  background: #FFFFFF;
+  background: var(--surface);
   color: var(--text-primary);
   outline: none;
 }
