@@ -3,105 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>旅行貨幣手帳</title>
-<meta name="theme-color" content="#f3e9d8">
+<title>旅行貨幣</title>
+<meta name="theme-color" content="#FFF9F5">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Zhi+Mang+Xing&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="page">
+<div class="app" id="scrollRoot">
 
-  <header class="header">
-    <h1 class="title">旅行貨幣手帳</h1>
-    <p class="subtitle">台幣 · 蒙圖 · 美金 · 韓元</p>
-    <button id="statusBadge" class="status-badge" type="button" aria-describedby="statusDetail">
+  <header class="nav">
+    <h1 class="nav-title">旅行貨幣</h1>
+    <p class="nav-subtitle">即時匯率換算，說走就走</p>
+    <button id="statusBadge" class="status-badge" type="button">
       <span id="statusDot" class="status-dot"></span>
       <span id="statusText">載入匯率中…</span>
     </button>
   </header>
 
-  <div id="offlineBanner" class="offline-banner hidden">
-    ✈️ 目前使用<strong>離線／手動</strong>匯率，數字僅供參考
+  <div id="offlineBanner" class="banner hidden">
+    目前使用<strong>離線／手動</strong>匯率，數字僅供參考
   </div>
 
-  <main class="cards" id="cards">
+  <main class="content">
 
-    <section class="card" data-currency="TWD" style="--accent:#c85c5c">
-      <div class="card-icon" aria-hidden="true">🇹🇼</div>
-      <div class="card-info">
-        <div class="card-code">TWD</div>
-        <div class="card-name">新台幣</div>
+    <section class="card converter-card" id="converterCard">
+
+      <button class="currency-row" id="fromRow" type="button" data-side="from">
+        <span class="currency-avatar" id="fromFlag">🇹🇼</span>
+        <span class="currency-meta">
+          <span class="currency-code" id="fromCode">TWD</span>
+          <span class="currency-name" id="fromName">新台幣</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <input class="amount-input" id="fromAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="輸入金額">
+
+      <div class="swap-divider">
+        <div class="divider-line"></div>
+        <button class="swap-btn" id="swapBtn" type="button" aria-label="交換幣別">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 7h10M13 3l4 4-4 4"/>
+            <path d="M17 17H7M11 21l-4-4 4-4"/>
+          </svg>
+        </button>
       </div>
-      <input class="card-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="TWD">
+
+      <button class="currency-row" id="toRow" type="button" data-side="to">
+        <span class="currency-avatar" id="toFlag">🇺🇸</span>
+        <span class="currency-meta">
+          <span class="currency-code" id="toCode">USD</span>
+          <span class="currency-name" id="toName">美金</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="amount-display" id="toAmount">0</div>
+
     </section>
 
-    <section class="card" data-currency="MNT" style="--accent:#5b8ab0">
-      <div class="card-icon" aria-hidden="true">🇲🇳</div>
-      <div class="card-info">
-        <div class="card-code">MNT</div>
-        <div class="card-name">蒙圖</div>
+    <p class="rate-line" id="rateLine">—</p>
+
+    <div class="calc-toolbar" id="calcToolbar">
+      <button type="button" data-op="+">＋</button>
+      <button type="button" data-op="-">－</button>
+      <button type="button" data-op="*">×</button>
+      <button type="button" data-op="/">÷</button>
+      <button type="button" data-op="C" class="calc-clear">C</button>
+      <button type="button" data-op="=" class="calc-equals">＝</button>
+    </div>
+
+    <div class="quick-amounts" id="quickAmounts"></div>
+
+    <section class="card trend-card" id="trendCard">
+      <div class="trend-head">
+        <span class="section-label">匯率趨勢</span>
+        <span class="trend-delta" id="trendDelta">近 14 天</span>
       </div>
-      <input class="card-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="MNT">
+      <svg class="sparkline" id="sparkline" viewBox="0 0 300 72" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="sparklineGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F6B26B" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#F6B26B" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <polyline id="sparklineFill" points="" />
+        <polyline id="sparklineLine" points="" />
+      </svg>
+      <p class="trend-caption" id="trendCaption">正在載入近期走勢…</p>
     </section>
 
-    <section class="card" data-currency="USD" style="--accent:#3f7a5c">
-      <div class="card-icon" aria-hidden="true">🇺🇸</div>
-      <div class="card-info">
-        <div class="card-code">USD</div>
-        <div class="card-name">美金</div>
-      </div>
-      <input class="card-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="USD">
+    <section class="list-section" id="recentSection">
+      <div class="section-head"><span class="section-label">最近使用</span></div>
+      <div class="chip-row" id="recentChips"></div>
     </section>
 
-    <section class="card" data-currency="KRW" style="--accent:#c97a4a">
-      <div class="card-icon" aria-hidden="true">🇰🇷</div>
-      <div class="card-info">
-        <div class="card-code">KRW</div>
-        <div class="card-name">韓元</div>
-      </div>
-      <input class="card-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="KRW">
+    <section class="list-section" id="favoriteSection">
+      <div class="section-head"><span class="section-label">收藏貨幣</span></div>
+      <div class="favorite-list" id="favoriteList"></div>
     </section>
 
   </main>
-
-  <div class="calc-toolbar" id="calcToolbar">
-    <button type="button" data-op="+">＋</button>
-    <button type="button" data-op="-">－</button>
-    <button type="button" data-op="*">×</button>
-    <button type="button" data-op="/">÷</button>
-    <button type="button" data-op="C" class="calc-clear">C</button>
-    <button type="button" data-op="=" class="calc-equals">＝</button>
-  </div>
-
-  <div class="quick-amounts" id="quickAmounts"></div>
-
-  <button id="manualToggle" class="manual-link" type="button">✏️ 手動調整匯率</button>
-
-  <section id="manualPanel" class="manual-panel hidden">
-    <p class="manual-hint">輸入 1 美金可兌換的各幣別金額，儲存後將以此為準（直到你按「改回即時匯率」）。</p>
-    <div class="manual-row">
-      <label for="manualTWD">1 USD = <span class="unit">TWD</span></label>
-      <input id="manualTWD" type="text" inputmode="decimal" autocomplete="off">
-    </div>
-    <div class="manual-row">
-      <label for="manualMNT">1 USD = <span class="unit">MNT</span></label>
-      <input id="manualMNT" type="text" inputmode="decimal" autocomplete="off">
-    </div>
-    <div class="manual-row">
-      <label for="manualKRW">1 USD = <span class="unit">KRW</span></label>
-      <input id="manualKRW" type="text" inputmode="decimal" autocomplete="off">
-    </div>
-    <div class="manual-actions">
-      <button id="manualSave" class="btn btn-primary" type="button">儲存手動匯率</button>
-      <button id="manualReset" class="btn btn-ghost" type="button">改回即時匯率</button>
-    </div>
-  </section>
 
   <footer class="footer">
     <p id="lastUpdated">—</p>
@@ -109,10 +112,77 @@
 
 </div>
 
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" type="button" data-tab="convert">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5h5V15h2v4.5h5V10"/></svg>
+    <span>換算</span>
+  </button>
+  <button class="tab-btn" type="button" data-tab="favorites">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg>
+    <span>收藏</span>
+  </button>
+  <button class="tab-btn" type="button" data-tab="settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="3.2"/>
+      <path d="M12 3.5v2.6M12 17.9v2.6M20.5 12h-2.6M6.1 12H3.5M17.7 6.3l-1.8 1.8M8.1 15.9l-1.8 1.8M17.7 17.7l-1.8-1.8M8.1 8.1 6.3 6.3"/>
+    </svg>
+    <span>設定</span>
+  </button>
+</nav>
+
+<div class="sheet-overlay hidden" id="pickerOverlay">
+  <div class="sheet" id="pickerSheet" role="dialog" aria-modal="true">
+    <div class="sheet-grabber"></div>
+    <div class="sheet-head">
+      <h2 class="sheet-title" id="pickerTitle">選擇貨幣</h2>
+      <button class="sheet-close" id="pickerClose" type="button" aria-label="關閉">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="picker-list" id="pickerList"></div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="settingsOverlay">
+  <div class="sheet" id="settingsSheet" role="dialog" aria-modal="true">
+    <div class="sheet-grabber"></div>
+    <div class="sheet-head">
+      <h2 class="sheet-title">設定</h2>
+      <button class="sheet-close" id="settingsClose" type="button" aria-label="關閉">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="settings-block">
+      <p class="settings-hint">輸入 1 美金可兌換的各幣別金額，儲存後將以此為準（直到你按「改回即時匯率」）。</p>
+      <div class="manual-row">
+        <label for="manualTWD">1 USD = <span class="unit">TWD</span></label>
+        <input id="manualTWD" type="text" inputmode="decimal" autocomplete="off">
+      </div>
+      <div class="manual-row">
+        <label for="manualMNT">1 USD = <span class="unit">MNT</span></label>
+        <input id="manualMNT" type="text" inputmode="decimal" autocomplete="off">
+      </div>
+      <div class="manual-row">
+        <label for="manualKRW">1 USD = <span class="unit">KRW</span></label>
+        <input id="manualKRW" type="text" inputmode="decimal" autocomplete="off">
+      </div>
+      <div class="manual-actions">
+        <button id="manualSave" class="btn btn-primary" type="button">儲存手動匯率</button>
+        <button id="manualReset" class="btn btn-secondary" type="button">改回即時匯率</button>
+      </div>
+    </div>
+
+    <p class="settings-footnote">旅行貨幣手帳 · 支援離線使用</p>
+  </div>
+</div>
+
 <div id="installToast" class="install-toast hidden">
-  <span>📌 把「旅行貨幣手帳」加到主畫面，離線也能開！</span>
-  <button id="installBtn" class="btn btn-primary btn-small" type="button">加到主畫面</button>
-  <button id="installDismiss" class="btn btn-ghost btn-small" type="button">關閉</button>
+  <span>把「旅行貨幣」加到主畫面，離線也能開！</span>
+  <div class="install-toast-actions">
+    <button id="installBtn" class="btn btn-primary btn-small" type="button">加到主畫面</button>
+    <button id="installDismiss" class="btn btn-secondary btn-small" type="button">關閉</button>
+  </div>
 </div>
 
 <script src="app.js"></script>
