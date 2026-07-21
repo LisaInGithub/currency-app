@@ -1,0 +1,368 @@
+:root {
+  --paper: #f3e9d8;
+  --paper-deep: #ead9bd;
+  --ink: #4a3f30;
+  --ink-soft: #8a7a63;
+  --line: #d9c8a8;
+  --card-bg: #fffaf0;
+  --shadow: 0 2px 0 rgba(74, 63, 48, 0.08), 0 8px 20px -12px rgba(74, 63, 48, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.5), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(74,63,48,0.02) 0px, transparent 1px, transparent 3px),
+    linear-gradient(160deg, var(--paper) 0%, var(--paper-deep) 100%);
+  color: var(--ink);
+  font-family: "Roboto Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-family: "Zhi Mang Xing", "Klee One", cursive;
+  font-size: 2.4rem;
+  margin: 0 0 2px;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-bg);
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7fae7f;
+  box-shadow: 0 0 0 3px rgba(127,174,127,0.2);
+}
+
+.status-badge.manual .status-dot {
+  background: #c9944a;
+  box-shadow: 0 0 0 3px rgba(201,148,74,0.2);
+}
+
+.status-badge.offline .status-dot {
+  background: #b06a5a;
+  box-shadow: 0 0 0 3px rgba(176,106,90,0.2);
+}
+
+.offline-banner {
+  border: 1px dashed #b06a5a;
+  background: rgba(176,106,90,0.08);
+  color: #7a4536;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-align: center;
+  margin: 0 0 16px;
+}
+
+.offline-banner.hidden { display: none; }
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card.active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 0 rgba(74,63,48,0.08), 0 12px 24px -10px rgba(74,63,48,0.4);
+}
+
+.card.active .card-code::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 6px;
+  background: var(--accent);
+  opacity: 0.35;
+  border-radius: 4px;
+  transform: rotate(-0.6deg);
+}
+
+.card-icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  line-height: 1;
+  background: var(--card-bg);
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 2px 4px rgba(74, 63, 48, 0.12);
+  overflow: hidden;
+}
+
+.card-info {
+  flex: none;
+  width: 68px;
+}
+
+.card-code {
+  position: relative;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.card-name {
+  font-family: "Klee One", cursive;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.card-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  text-align: right;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--ink);
+  outline: none;
+  padding: 4px 0;
+}
+
+.card-input::placeholder { color: #cdbfa0; }
+
+.calc-toolbar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 18px 0 4px;
+}
+
+.calc-toolbar button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card-bg);
+  color: var(--ink);
+  font-family: "Roboto Mono", monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.calc-toolbar button:active {
+  background: var(--paper-deep);
+}
+
+.calc-toolbar .calc-equals {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.calc-toolbar .calc-clear {
+  color: #b0655a;
+  border-color: #b0655a55;
+}
+
+.quick-amounts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px 0 6px;
+}
+
+.quick-amounts button {
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.82rem;
+  border: 1px dashed var(--line);
+  background: rgba(255,255,255,0.5);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.quick-amounts button:active {
+  background: var(--paper-deep);
+}
+
+.manual-link {
+  display: block;
+  margin: 18px auto 0;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.82rem;
+  text-decoration: underline dashed;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.manual-panel {
+  margin-top: 14px;
+  background: var(--card-bg);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.manual-panel.hidden { display: none; }
+
+.manual-hint {
+  font-family: "Klee One", cursive;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.manual-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.manual-row label { color: var(--ink-soft); }
+.manual-row .unit { color: var(--ink); font-weight: 700; }
+
+.manual-row input {
+  width: 120px;
+  text-align: right;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.manual-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn {
+  font-family: inherit;
+  font-size: 0.82rem;
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+
+.btn-small { padding: 6px 12px; font-size: 0.76rem; }
+
+.footer {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.install-toast {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 16px;
+  max-width: 456px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow);
+  font-size: 0.8rem;
+}
+
+.install-toast.hidden { display: none; }
+.install-toast span { flex: 1 1 100%; font-family: "Klee One", cursive; color: var(--ink); }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #2a251d;
+    --paper-deep: #201c16;
+    --ink: #ede3cf;
+    --ink-soft: #b3a488;
+    --line: #4a4131;
+    --card-bg: #342e23;
+    --shadow: 0 2px 0 rgba(0,0,0,0.3), 0 8px 20px -12px rgba(0,0,0,0.6);
+  }
+  .card-input::placeholder { color: #6b6046; }
+  .manual-row input { background: #201c16; border-color: var(--line); color: var(--ink); }
+  .btn-primary { background: var(--ink); color: #201c16; }
+}

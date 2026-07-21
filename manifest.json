@@ -1,0 +1,15 @@
+{
+  "name": "旅行貨幣手帳",
+  "short_name": "貨幣手帳",
+  "description": "台幣、蒙圖、美金、韓元即時匯率轉換",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3e9d8",
+  "theme_color": "#f3e9d8",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
