@@ -73,6 +73,9 @@
     offlineBanner: $('offlineBanner'),
     cardList: $('cardList'),
     manageBtn: $('manageBtn'),
+    keypadSheet: $('keypadSheet'),
+    keypadLabel: $('keypadLabel'),
+    keypadDone: $('keypadDone'),
     keypad: $('keypad'),
     quickAmounts: $('quickAmounts'),
     trendLabel: $('trendLabel'),
@@ -509,22 +512,22 @@
     renderConversions();
   }
 
-  // The floating tab bar sits fixed at the bottom of the viewport and can
-  // overlap the keypad (and the quick-amount chips right below it) on
-  // shorter screens. Nudge the page up just enough to clear whichever of
-  // the two reaches lower, whenever the keypad might be in use.
-  function scrollKeypadIntoView(smooth) {
-    requestAnimationFrame(() => {
-      const padRect = els.keypad.getBoundingClientRect();
-      const quickRect = els.quickAmounts.getBoundingClientRect();
-      const barRect = els.tabBar.getBoundingClientRect();
-      const bottom = Math.max(padRect.bottom, quickRect.bottom);
-      const overlap = bottom - barRect.top;
-      if (overlap > 0) {
-        window.scrollBy({ top: overlap + 16, behavior: smooth ? 'smooth' : 'auto' });
-      }
-    });
+  // The keypad lives in a floating sheet that overlays the tab bar (and
+  // everything else) instead of pushing the page around, so the currency
+  // cards stay visible above it the whole time it's open.
+  function openKeypadSheet() {
+    els.keypadLabel.textContent = `${activeCurrency} · ${CURRENCIES[activeCurrency].name}`;
+    els.keypadSheet.classList.remove('hidden');
   }
+
+  function closeKeypadSheet() {
+    commitActiveExpression();
+    const input = activeInput();
+    if (input) input.blur();
+    els.keypadSheet.classList.add('hidden');
+  }
+
+  els.keypadDone.addEventListener('click', closeKeypadSheet);
 
   els.cardList.addEventListener('focusin', (e) => {
     const input = e.target.closest('.amount-input');
@@ -543,7 +546,7 @@
     renderQuickAmounts();
     renderConversions();
     renderSparkline();
-    scrollKeypadIntoView(true);
+    openKeypadSheet();
   });
 
   els.cardList.addEventListener('input', (e) => {
@@ -836,12 +839,6 @@
     const next = isDark ? 'light' : 'dark';
     applyTheme(next);
     localStorage.setItem(LS_THEME, next);
-  });
-
-  window.addEventListener('resize', () => {
-    if (document.activeElement && document.activeElement.classList.contains('amount-input')) {
-      scrollKeypadIntoView(false);
-    }
   });
 
   // --- init ---

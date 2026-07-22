@@ -329,6 +329,57 @@ svg {
   color: var(--primary-strong);
 }
 
+/* ---------- Keypad sheet ---------- */
+/* Floats above the tab bar (and everything else) so the currency
+   cards stay put and visible while an amount is being entered —
+   no page scrolling needed to see both at once. */
+
+.keypad-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--surface);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  padding: 8px 20px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 30px rgba(58, 49, 43, 0.16);
+  transform: translateY(0);
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.keypad-sheet.hidden {
+  transform: translateY(105%);
+  pointer-events: none;
+}
+
+.keypad-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 2px 12px;
+}
+
+.keypad-sheet-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.keypad-done {
+  border: none;
+  background: none;
+  color: var(--primary-strong);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.keypad-sheet .quick-amounts {
+  margin-bottom: 10px;
+}
+
 /* ---------- Keypad ---------- */
 
 .keypad {
