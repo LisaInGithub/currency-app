@@ -579,6 +579,22 @@
 
   els.keypadDone.addEventListener('click', closeKeypadSheet);
 
+  // Tapping anywhere outside the keypad (and outside any currency card,
+  // so switching to a different card can hand off normally instead of
+  // closing then immediately reopening) also closes it, not just "完成".
+  // Uses pointerdown rather than click: switching cards repositions the
+  // keypad sheet in the DOM (it docks after whichever card is active),
+  // and that reflow happens between mousedown and click, so a click
+  // listener can end up seeing a target that's already shifted onto the
+  // keypad's new spot instead of the card that was actually tapped.
+  // pointerdown fires before that reflow, at the correct original target.
+  document.addEventListener('pointerdown', (e) => {
+    if (els.keypadSheet.classList.contains('hidden')) return;
+    if (els.keypadSheet.contains(e.target)) return;
+    if (e.target.closest('.currency-card')) return;
+    closeKeypadSheet();
+  });
+
   els.cardList.addEventListener('click', (e) => {
     const input = e.target.closest('.amount-input');
     if (!input) return;
