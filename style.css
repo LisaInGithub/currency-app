@@ -147,13 +147,13 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--divider);
   border-radius: 999px;
   padding: 7px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #33495C;
   cursor: default;
 }
 
@@ -884,7 +884,7 @@ svg {
   :root:not([data-theme="light"]) .nav-subtitle,
   :root:not([data-theme="light"]) .footer { color: var(--text-secondary); }
   :root:not([data-theme="light"]) .add-currency-card { border-color: var(--divider); color: var(--text-secondary); }
-  :root:not([data-theme="light"]) .status-badge { background: rgba(16, 32, 46, 0.55); }
+  :root:not([data-theme="light"]) .status-badge { background: rgba(16, 32, 46, 0.55); color: var(--text-secondary); }
   :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.12); }
   :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.08); }
   :root:not([data-theme="light"]) .manual-row input { background: #16293A; }
@@ -919,7 +919,7 @@ svg {
 :root[data-theme="dark"] .nav-subtitle,
 :root[data-theme="dark"] .footer { color: var(--text-secondary); }
 :root[data-theme="dark"] .add-currency-card { border-color: var(--divider); color: var(--text-secondary); }
-:root[data-theme="dark"] .status-badge { background: rgba(16, 32, 46, 0.55); }
+:root[data-theme="dark"] .status-badge { background: rgba(16, 32, 46, 0.55); color: var(--text-secondary); }
 :root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.12); }
 :root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.08); }
 :root[data-theme="dark"] .manual-row input { background: #16293A; }
