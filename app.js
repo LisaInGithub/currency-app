@@ -609,6 +609,17 @@
     commitActiveExpression();
   });
 
+  // iOS Safari can still trigger its native long-press text-selection
+  // callout (拷貝／Live Text／…) on a readonly input even with
+  // user-select: none applied. Block it outright so the only way to
+  // change a field's value is through the custom keypad.
+  els.cardList.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.amount-input')) e.preventDefault();
+  });
+  els.cardList.addEventListener('selectstart', (e) => {
+    if (e.target.closest('.amount-input')) e.preventDefault();
+  });
+
   // Prevent the keypad buttons from stealing focus away from the amount
   // field they're editing (avoids a blur/refocus flicker on every tap).
   els.keypad.addEventListener('pointerdown', (e) => e.preventDefault());
