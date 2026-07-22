@@ -108,6 +108,11 @@
   let selected = [...DEFAULT_SELECTED];
   let activeCurrency = 'TWD';
   let activeAmount = 1000;
+  // When true, the next digit/decimal keypress replaces the field's
+  // current value outright instead of appending to it — set whenever a
+  // card is freshly selected or a value was just committed, so typing
+  // a new number doesn't glue onto the old one.
+  let pendingReplace = true;
 
   function currentRates() {
     const merged = { ...FALLBACK_RATES };
@@ -194,11 +199,10 @@
   }
 
   function buildCards() {
-    // The keypad sheet gets moved inline into #cardList while open (see
-    // openKeypadSheet) — detach it first or innerHTML='' would destroy it.
-    const keypadWasOpen = els.keypadSheet.parentElement === els.cardList
-      && !els.keypadSheet.classList.contains('hidden');
-    if (els.keypadSheet.parentElement === els.cardList) els.keypadSheet.remove();
+    // The keypad sheet gets moved inline into #cardList (see
+    // openKeypadSheet) — detach it first or innerHTML='' would destroy
+    // it outright. .remove() is a safe no-op if it's already elsewhere.
+    els.keypadSheet.remove();
 
     els.cardList.innerHTML = '';
     orderedSelected().forEach((code) => {
@@ -219,10 +223,11 @@
       els.cardList.appendChild(card);
     });
 
-    if (keypadWasOpen) {
-      const activeCard = els.cardList.querySelector(`.currency-card[data-currency="${activeCurrency}"]`);
-      if (activeCard) activeCard.insertAdjacentElement('afterend', els.keypadSheet);
-    }
+    // Give it a home in the document again regardless of open/hidden
+    // state, so it's never left orphaned outside the DOM.
+    const activeCard = els.cardList.querySelector(`.currency-card[data-currency="${activeCurrency}"]`);
+    if (activeCard) activeCard.insertAdjacentElement('afterend', els.keypadSheet);
+    else els.cardList.appendChild(els.keypadSheet);
   }
 
   // ---------- Drag to reorder ----------
@@ -231,6 +236,11 @@
   let drag = null;
 
   function beginDrag(handle, pointerId, clientY) {
+    // The keypad sheet, when open, is wedged inline between two cards —
+    // its extra height would throw off the uniform slot-spacing math
+    // below. Close it first so the list is just cards again.
+    if (!els.keypadSheet.classList.contains('hidden')) closeKeypadSheet();
+
     const card = handle.closest('.currency-card');
     const order = orderedSelected();
     const index = order.indexOf(card.dataset.currency);
@@ -521,6 +531,7 @@
     activeAmount = result;
     setAmountValue(input, formatNumber(result));
     renderConversions();
+    pendingReplace = true;
   }
 
   // The keypad docks inline directly under whichever card is being
@@ -545,6 +556,7 @@
     if (activeCard) activeCard.insertAdjacentElement('afterend', els.keypadSheet);
     els.keypadLabel.textContent = `${activeCurrency} · ${CURRENCIES[activeCurrency].name}`;
     els.keypadSheet.classList.remove('hidden');
+    pendingReplace = true;
     ensureKeypadVisible();
   }
 
@@ -610,13 +622,20 @@
     if (key === 'C') {
       input.value = '';
       previewActiveAmount('');
+      pendingReplace = false;
     } else if (key === '=') {
       commitActiveExpression();
     } else if (key === 'back') {
       input.value = input.value.slice(0, -1);
       previewActiveAmount(input.value);
+      pendingReplace = false;
     } else {
-      input.value = (input.value || '') + key;
+      // A fresh digit/decimal replaces the shown value outright (it's
+      // effectively pre-selected); an operator continues the expression
+      // from it instead, same as a normal calculator.
+      const isDigitOrDot = key === '.' || (key.length === 1 && key >= '0' && key <= '9');
+      input.value = (pendingReplace && isDigitOrDot) ? key : (input.value || '') + key;
+      pendingReplace = false;
       previewActiveAmount(input.value);
     }
     input.focus();
