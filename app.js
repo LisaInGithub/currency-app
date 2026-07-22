@@ -510,13 +510,16 @@
   }
 
   // The floating tab bar sits fixed at the bottom of the viewport and can
-  // overlap the keypad's lower rows on shorter screens. Nudge the page up
-  // just enough to clear it whenever the keypad might be in use.
+  // overlap the keypad (and the quick-amount chips right below it) on
+  // shorter screens. Nudge the page up just enough to clear whichever of
+  // the two reaches lower, whenever the keypad might be in use.
   function scrollKeypadIntoView(smooth) {
     requestAnimationFrame(() => {
       const padRect = els.keypad.getBoundingClientRect();
+      const quickRect = els.quickAmounts.getBoundingClientRect();
       const barRect = els.tabBar.getBoundingClientRect();
-      const overlap = padRect.bottom - barRect.top;
+      const bottom = Math.max(padRect.bottom, quickRect.bottom);
+      const overlap = bottom - barRect.top;
       if (overlap > 0) {
         window.scrollBy({ top: overlap + 16, behavior: smooth ? 'smooth' : 'auto' });
       }
