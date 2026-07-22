@@ -372,16 +372,18 @@
       btn.textContent = formatNumber(amt);
       btn.addEventListener('click', () => {
         const input = els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
-        activeAmount = amt;
-        setAmountValue(input, formatNumber(amt));
-        renderConversions();
-        // Land in the same state as if the user had just typed this
-        // number on the keypad, so an operator/digit pressed next
-        // continues the expression (e.g. "100" then "×" then "5")
-        // instead of the leftover value getting wiped by a stale
-        // replace-mode flag.
+        if (!input) return;
+        const formatted = formatNumber(amt);
+        // If the field is mid-expression (ends with a dangling operator,
+        // e.g. "7*"), the chip is the next operand — append it instead
+        // of wiping out what was already typed. Otherwise it's a fresh
+        // pick (or replacing a previous chip pick), so it replaces the
+        // whole value outright.
+        const endsWithOperator = /[+\-*/]\s*$/.test(input.value || '');
+        input.value = endsWithOperator ? (input.value || '') + formatted : formatted;
         pendingReplace = false;
-        if (input) input.focus();
+        previewActiveAmount(input.value);
+        input.focus();
       });
       els.quickAmounts.appendChild(btn);
     });
