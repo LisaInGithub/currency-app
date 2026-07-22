@@ -451,21 +451,23 @@ svg {
 }
 
 .quick-amounts {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
 .quick-amounts button {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   border: 1px solid var(--divider);
   background: var(--surface);
   color: var(--text-primary);
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 8px 4px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: transform 0.15s var(--ease-spring), background-color 0.15s ease;
 }
 
