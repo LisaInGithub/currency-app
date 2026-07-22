@@ -1,12 +1,12 @@
-const CACHE_NAME = 'currency-app-v10';
+const CACHE_NAME = 'currency-app-v11';
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
-  './icons/icon-192.svg',
-  './icons/icon-512.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
