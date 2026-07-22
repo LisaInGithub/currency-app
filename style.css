@@ -19,6 +19,18 @@
   --text-primary: #3A312B;
   --text-secondary: #7A6E63;
 
+  /* The keypad panel is deliberately a fixed dark gray-brown, independent
+     of the light/dark theme tokens above, so it always reads as a
+     distinct "input console" against the page behind it. */
+  --keypad-bg: #443A32;
+  --keypad-key-bg: #564A40;
+  --keypad-key-active-bg: #6B5C4E;
+  --keypad-text: #F4EAE0;
+  --keypad-text-secondary: #C9B9A8;
+  --keypad-divider: #6B5C4E;
+  --keypad-op: #FFC088;
+  --keypad-danger: #F0A79D;
+
   --radius-card: 24px;
   --radius-button: 18px;
   --radius-sheet: 26px;
@@ -330,46 +342,40 @@ svg {
 }
 
 /* ---------- Keypad sheet ---------- */
-/* Floats above the tab bar (and everything else) so the currency
-   cards stay put and visible while an amount is being entered —
-   no page scrolling needed to see both at once. */
+/* Docks inline directly under whichever currency card is being edited
+   (JS moves this node there), instead of floating fixed at the bottom —
+   so it always sits right where you're looking. Deliberately a dark
+   gray-brown, independent of the light/dark theme, so it reads as a
+   distinct input console against the card list around it. */
 
 .keypad-sheet {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  background: var(--surface);
-  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
-  padding: 8px 20px calc(16px + env(safe-area-inset-bottom));
-  box-shadow: 0 -10px 30px rgba(58, 49, 43, 0.16);
-  transform: translateY(0);
-  transition: transform 0.3s var(--ease-spring);
+  background: var(--keypad-bg);
+  border-radius: var(--radius-card);
+  padding: 14px 16px 16px;
+  box-shadow: var(--shadow-float);
 }
 
 .keypad-sheet.hidden {
-  transform: translateY(105%);
-  pointer-events: none;
+  display: none;
 }
 
 .keypad-sheet-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 4px 2px 12px;
+  margin: 2px 2px 12px;
 }
 
 .keypad-sheet-label {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--keypad-text-secondary);
 }
 
 .keypad-done {
   border: none;
   background: none;
-  color: var(--primary-strong);
+  color: var(--keypad-op);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -378,6 +384,16 @@ svg {
 
 .keypad-sheet .quick-amounts {
   margin-bottom: 10px;
+}
+
+.keypad-sheet .quick-amounts button {
+  border-color: var(--keypad-divider);
+  background: var(--keypad-key-bg);
+  color: var(--keypad-text);
+}
+
+.keypad-sheet .quick-amounts button:active {
+  background: var(--keypad-key-active-bg);
 }
 
 /* ---------- Keypad ---------- */
@@ -391,35 +407,32 @@ svg {
 .key {
   height: 46px;
   border-radius: 14px;
-  border: 1px solid var(--divider);
-  background: var(--surface);
-  color: var(--text-primary);
+  border: none;
+  background: var(--keypad-key-bg);
+  color: var(--keypad-text);
   font-size: 19px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
-  box-shadow: var(--shadow-card);
   transition: transform 0.15s var(--ease-spring), background-color 0.15s ease;
 }
 
 .key:active {
   transform: scale(0.94);
-  background: var(--bg-bottom);
+  background: var(--keypad-key-active-bg);
 }
 
 .key-op {
-  color: var(--primary-strong);
+  color: var(--keypad-op);
 }
 
 .key-clear {
-  color: var(--danger-ink);
-  border-color: var(--danger);
+  color: var(--keypad-danger);
 }
 
 .key-equals {
   background: var(--primary);
   color: #FFFFFF;
-  border-color: var(--primary);
 }
 
 .key-backspace {
@@ -843,6 +856,7 @@ svg {
   }
 
   :root:not([data-theme="light"]) .amount-input::placeholder { color: #4A3F30; }
+  :root:not([data-theme="light"]) .status-badge { background: rgba(44, 36, 28, 0.6); }
   :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.1); }
   :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.06); }
   :root:not([data-theme="light"]) .manual-row input { background: #221C16; }
@@ -871,6 +885,7 @@ svg {
 }
 
 :root[data-theme="dark"] .amount-input::placeholder { color: #4A3F30; }
+:root[data-theme="dark"] .status-badge { background: rgba(44, 36, 28, 0.6); }
 :root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.1); }
 :root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.06); }
 :root[data-theme="dark"] .manual-row input { background: #221C16; }

@@ -194,6 +194,12 @@
   }
 
   function buildCards() {
+    // The keypad sheet gets moved inline into #cardList while open (see
+    // openKeypadSheet) — detach it first or innerHTML='' would destroy it.
+    const keypadWasOpen = els.keypadSheet.parentElement === els.cardList
+      && !els.keypadSheet.classList.contains('hidden');
+    if (els.keypadSheet.parentElement === els.cardList) els.keypadSheet.remove();
+
     els.cardList.innerHTML = '';
     orderedSelected().forEach((code) => {
       const info = CURRENCIES[code];
@@ -212,6 +218,11 @@
         </button>`;
       els.cardList.appendChild(card);
     });
+
+    if (keypadWasOpen) {
+      const activeCard = els.cardList.querySelector(`.currency-card[data-currency="${activeCurrency}"]`);
+      if (activeCard) activeCard.insertAdjacentElement('afterend', els.keypadSheet);
+    }
   }
 
   // ---------- Drag to reorder ----------
@@ -512,12 +523,29 @@
     renderConversions();
   }
 
-  // The keypad lives in a floating sheet that overlays the tab bar (and
-  // everything else) instead of pushing the page around, so the currency
-  // cards stay visible above it the whole time it's open.
+  // The keypad docks inline directly under whichever card is being
+  // edited (moved there in the DOM), rather than a fixed spot — but the
+  // floating tab bar can still end up on top of it depending on scroll
+  // position, so nudge the page to keep it clear either direction.
+  function ensureKeypadVisible() {
+    requestAnimationFrame(() => {
+      const rect = els.keypadSheet.getBoundingClientRect();
+      const barRect = els.tabBar.getBoundingClientRect();
+      const bottomOverlap = rect.bottom - barRect.top;
+      if (bottomOverlap > 0) {
+        window.scrollBy({ top: bottomOverlap + 16, behavior: 'smooth' });
+      } else if (rect.top < 12) {
+        window.scrollBy({ top: rect.top - 12, behavior: 'smooth' });
+      }
+    });
+  }
+
   function openKeypadSheet() {
+    const activeCard = els.cardList.querySelector(`.currency-card[data-currency="${activeCurrency}"]`);
+    if (activeCard) activeCard.insertAdjacentElement('afterend', els.keypadSheet);
     els.keypadLabel.textContent = `${activeCurrency} · ${CURRENCIES[activeCurrency].name}`;
     els.keypadSheet.classList.remove('hidden');
+    ensureKeypadVisible();
   }
 
   function closeKeypadSheet() {
