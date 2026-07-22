@@ -569,6 +569,16 @@
 
   els.keypadDone.addEventListener('click', closeKeypadSheet);
 
+  els.cardList.addEventListener('click', (e) => {
+    const input = e.target.closest('.amount-input');
+    if (!input) return;
+    // Re-arm on every tap, not just when switching cards — tapping the
+    // already-active currency again should also let the next digit
+    // replace the shown value, instead of only working the first time
+    // a card gains focus (focusin only fires on an actual focus change).
+    pendingReplace = true;
+  });
+
   els.cardList.addEventListener('focusin', (e) => {
     const input = e.target.closest('.amount-input');
     if (!input) return;
