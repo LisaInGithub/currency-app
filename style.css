@@ -856,6 +856,7 @@ svg {
   }
 
   :root:not([data-theme="light"]) .amount-input::placeholder { color: #4A3F30; }
+  :root:not([data-theme="light"]) .status-badge { background: rgba(44, 36, 28, 0.6); }
   :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.1); }
   :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.06); }
   :root:not([data-theme="light"]) .manual-row input { background: #221C16; }
@@ -884,6 +885,7 @@ svg {
 }
 
 :root[data-theme="dark"] .amount-input::placeholder { color: #4A3F30; }
+:root[data-theme="dark"] .status-badge { background: rgba(44, 36, 28, 0.6); }
 :root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.1); }
 :root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.06); }
 :root[data-theme="dark"] .manual-row input { background: #221C16; }
