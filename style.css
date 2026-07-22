@@ -6,9 +6,9 @@
   --primary-strong: #E58D20;
   --secondary: #FFDDA2;
   --accent: #F4C94D;
-  --bg-top: #EAF7FF;
-  --bg-mid: #D6ECFA;
-  --bg-bottom: #C7E5F7;
+  --bg-top: #4DA6E0;
+  --bg-mid: #3B8DBF;
+  --bg-bottom: #2A6D9E;
   --surface: #FEF5D3;
   --card: #FEF5D3;
   --card-selected-bg: #FFF4D4;
@@ -109,7 +109,7 @@ svg {
 .nav-subtitle {
   margin: 0 0 14px;
   font-size: 15px;
-  color: var(--text-secondary);
+  color: rgba(44, 58, 71, 0.8);
 }
 
 .theme-toggle {
@@ -335,9 +335,9 @@ svg {
   width: 100%;
   padding: 14px;
   border-radius: var(--radius-card);
-  border: 1.5px dashed var(--divider);
+  border: 1.5px dashed rgba(255, 255, 255, 0.6);
   background: transparent;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -557,7 +557,7 @@ svg {
   text-align: center;
   margin-top: 22px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* ---------- Tab bar ---------- */
@@ -879,6 +879,9 @@ svg {
   }
 
   :root:not([data-theme="light"]) .amount-input::placeholder { color: #3E5975; }
+  :root:not([data-theme="light"]) .nav-subtitle,
+  :root:not([data-theme="light"]) .footer { color: var(--text-secondary); }
+  :root:not([data-theme="light"]) .add-currency-card { border-color: var(--divider); color: var(--text-secondary); }
   :root:not([data-theme="light"]) .status-badge { background: rgba(16, 32, 46, 0.55); }
   :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.12); }
   :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.08); }
@@ -910,6 +913,9 @@ svg {
 }
 
 :root[data-theme="dark"] .amount-input::placeholder { color: #3E5975; }
+:root[data-theme="dark"] .nav-subtitle,
+:root[data-theme="dark"] .footer { color: var(--text-secondary); }
+:root[data-theme="dark"] .add-currency-card { border-color: var(--divider); color: var(--text-secondary); }
 :root[data-theme="dark"] .status-badge { background: rgba(16, 32, 46, 0.55); }
 :root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.12); }
 :root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.08); }
