@@ -312,6 +312,9 @@ svg {
   color: var(--text-primary);
   outline: none;
   padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .amount-input::placeholder { color: #E7D9C8; }
