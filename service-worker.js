@@ -1,4 +1,4 @@
-const CACHE_NAME = 'currency-app-v15';
+const CACHE_NAME = 'currency-app-v16';
 const APP_SHELL = [
   './',
   './index.html',
