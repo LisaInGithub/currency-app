@@ -13,6 +13,7 @@
   --card: #FEF5D3;
   --card-selected-bg: #FFF4D4;
   --card-hover: #FCE97C;
+  --surface-muted: #F5E9C6;
   --divider: #ECDFAF;
   --success: #8FD3A7;
   --success-ink: #4E8F68;
@@ -273,7 +274,7 @@ svg {
   justify-content: center;
   font-size: 32px;
   line-height: 1;
-  background: var(--bg-bottom);
+  background: var(--surface-muted);
   border: 1px solid var(--divider);
 }
 
@@ -514,7 +515,7 @@ svg {
   color: var(--text-secondary);
   padding: 3px 10px;
   border-radius: 999px;
-  background: var(--bg-bottom);
+  background: var(--surface-muted);
 }
 
 .trend-delta.up { color: var(--success-ink); background: var(--success-bg); }
@@ -674,7 +675,7 @@ svg {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: var(--bg-bottom);
+  background: var(--surface-muted);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -734,7 +735,7 @@ svg {
 /* ---------- Settings ---------- */
 
 .settings-block {
-  background: var(--bg-bottom);
+  background: var(--surface-muted);
   border-radius: 18px;
   padding: 16px;
   margin-bottom: 16px;
