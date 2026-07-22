@@ -73,7 +73,10 @@
     offlineBanner: $('offlineBanner'),
     cardList: $('cardList'),
     manageBtn: $('manageBtn'),
-    calcToolbar: $('calcToolbar'),
+    keypadSheet: $('keypadSheet'),
+    keypadLabel: $('keypadLabel'),
+    keypadDone: $('keypadDone'),
+    keypad: $('keypad'),
     quickAmounts: $('quickAmounts'),
     trendLabel: $('trendLabel'),
     trendDelta: $('trendDelta'),
@@ -203,7 +206,7 @@
           <span class="currency-code">${code}</span>
           <span class="currency-name">${info.name}</span>
         </span>
-        <input class="amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-currency="${code}" aria-label="${info.name}金額">
+        <input class="amount-input" type="text" inputmode="none" autocomplete="off" readonly placeholder="0" data-currency="${code}" aria-label="${info.name}金額">
         <button class="drag-handle" type="button" tabindex="-1" aria-label="拖曳調整順序">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h10M7 16h10"/></svg>
         </button>`;
@@ -213,7 +216,7 @@
 
   // ---------- Drag to reorder ----------
 
-  const GAP = 12;
+  const GAP = 9; // must match .card-list gap in style.css
   let drag = null;
 
   function beginDrag(handle, pointerId, clientY) {
@@ -222,6 +225,11 @@
     const index = order.indexOf(card.dataset.currency);
     if (index === -1) return;
 
+    const siblingEls = {};
+    order.forEach((code) => {
+      siblingEls[code] = els.cardList.querySelector(`.currency-card[data-currency="${code}"]`);
+    });
+
     els.cardList.style.minHeight = `${els.cardList.offsetHeight}px`;
     card.classList.add('dragging');
     card.style.position = 'absolute';
@@ -229,6 +237,7 @@
     card.style.right = '0';
     card.style.top = `${card.offsetTop}px`;
     card.style.zIndex = '50';
+    card.style.transform = 'translateY(0px)';
     handle.setPointerCapture(pointerId);
 
     drag = {
@@ -236,16 +245,20 @@
       card,
       handle,
       order: [...order],
+      siblingEls,
       index,
       startY: clientY,
+      pendingY: clientY,
+      rafId: 0,
       slot: card.offsetHeight + GAP,
       targetIndex: index,
     };
   }
 
-  function updateDrag(clientY) {
+  function applyDragFrame() {
     if (!drag) return;
-    const deltaY = clientY - drag.startY;
+    drag.rafId = 0;
+    const deltaY = drag.pendingY - drag.startY;
     drag.card.style.transform = `translateY(${deltaY}px)`;
 
     const shift = Math.round(deltaY / drag.slot);
@@ -255,7 +268,7 @@
 
     drag.order.forEach((code, i) => {
       if (code === drag.card.dataset.currency) return;
-      const sibling = els.cardList.querySelector(`.currency-card[data-currency="${code}"]`);
+      const sibling = drag.siblingEls[code];
       if (!sibling) return;
       let offset = 0;
       if (drag.targetIndex > drag.index && i > drag.index && i <= drag.targetIndex) offset = -drag.slot;
@@ -264,8 +277,15 @@
     });
   }
 
+  function updateDrag(clientY) {
+    if (!drag) return;
+    drag.pendingY = clientY;
+    if (!drag.rafId) drag.rafId = requestAnimationFrame(applyDragFrame);
+  }
+
   function endDrag() {
     if (!drag) return;
+    if (drag.rafId) cancelAnimationFrame(drag.rafId);
     const finalOrder = [...drag.order];
     const [moved] = finalOrder.splice(drag.index, 1);
     finalOrder.splice(drag.targetIndex, 0, moved);
@@ -492,6 +512,23 @@
     renderConversions();
   }
 
+  // The keypad lives in a floating sheet that overlays the tab bar (and
+  // everything else) instead of pushing the page around, so the currency
+  // cards stay visible above it the whole time it's open.
+  function openKeypadSheet() {
+    els.keypadLabel.textContent = `${activeCurrency} · ${CURRENCIES[activeCurrency].name}`;
+    els.keypadSheet.classList.remove('hidden');
+  }
+
+  function closeKeypadSheet() {
+    commitActiveExpression();
+    const input = activeInput();
+    if (input) input.blur();
+    els.keypadSheet.classList.add('hidden');
+  }
+
+  els.keypadDone.addEventListener('click', closeKeypadSheet);
+
   els.cardList.addEventListener('focusin', (e) => {
     const input = e.target.closest('.amount-input');
     if (!input) return;
@@ -509,6 +546,7 @@
     renderQuickAmounts();
     renderConversions();
     renderSparkline();
+    openKeypadSheet();
   });
 
   els.cardList.addEventListener('input', (e) => {
@@ -531,19 +569,26 @@
     commitActiveExpression();
   });
 
-  els.calcToolbar.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-op]');
+  // Prevent the keypad buttons from stealing focus away from the amount
+  // field they're editing (avoids a blur/refocus flicker on every tap).
+  els.keypad.addEventListener('pointerdown', (e) => e.preventDefault());
+
+  els.keypad.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-key]');
     if (!btn) return;
     const input = activeInput();
     if (!input) return;
-    const op = btn.dataset.op;
-    if (op === 'C') {
+    const key = btn.dataset.key;
+    if (key === 'C') {
       input.value = '';
       previewActiveAmount('');
-    } else if (op === '=') {
+    } else if (key === '=') {
       commitActiveExpression();
+    } else if (key === 'back') {
+      input.value = input.value.slice(0, -1);
+      previewActiveAmount(input.value);
     } else {
-      input.value = (input.value || '') + op;
+      input.value = (input.value || '') + key;
       previewActiveAmount(input.value);
     }
     input.focus();

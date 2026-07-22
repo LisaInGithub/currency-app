@@ -49,17 +49,6 @@
       <span>管理貨幣</span>
     </button>
 
-    <div class="calc-toolbar" id="calcToolbar">
-      <button type="button" data-op="+">＋</button>
-      <button type="button" data-op="-">－</button>
-      <button type="button" data-op="*">×</button>
-      <button type="button" data-op="/">÷</button>
-      <button type="button" data-op="C" class="calc-clear">C</button>
-      <button type="button" data-op="=" class="calc-equals">＝</button>
-    </div>
-
-    <div class="quick-amounts" id="quickAmounts"></div>
-
     <section class="card trend-card" id="trendCard">
       <div class="trend-head">
         <span class="section-label" id="trendLabel">匯率趨勢</span>
@@ -103,6 +92,37 @@
     <span>設定</span>
   </button>
 </nav>
+
+<div class="keypad-sheet hidden" id="keypadSheet">
+  <div class="sheet-grabber"></div>
+  <div class="keypad-sheet-head">
+    <span class="keypad-sheet-label" id="keypadLabel">TWD</span>
+    <button class="keypad-done" id="keypadDone" type="button">完成</button>
+  </div>
+  <div class="quick-amounts" id="quickAmounts"></div>
+  <div class="keypad" id="keypad">
+    <button type="button" class="key" data-key="7">7</button>
+    <button type="button" class="key" data-key="8">8</button>
+    <button type="button" class="key" data-key="9">9</button>
+    <button type="button" class="key key-op" data-key="/">÷</button>
+    <button type="button" class="key" data-key="4">4</button>
+    <button type="button" class="key" data-key="5">5</button>
+    <button type="button" class="key" data-key="6">6</button>
+    <button type="button" class="key key-op" data-key="*">×</button>
+    <button type="button" class="key" data-key="1">1</button>
+    <button type="button" class="key" data-key="2">2</button>
+    <button type="button" class="key" data-key="3">3</button>
+    <button type="button" class="key key-op" data-key="-">－</button>
+    <button type="button" class="key key-clear" data-key="C">C</button>
+    <button type="button" class="key" data-key="0">0</button>
+    <button type="button" class="key" data-key=".">.</button>
+    <button type="button" class="key key-op" data-key="+">＋</button>
+    <button type="button" class="key key-backspace" data-key="back" aria-label="刪除一位數">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7l-5-6z"/><path d="M14 10l-4 4M10 10l4 4"/></svg>
+    </button>
+    <button type="button" class="key key-equals" data-key="=">＝</button>
+  </div>
+</div>
 
 <div class="sheet-overlay hidden" id="manageOverlay">
   <div class="sheet" id="manageSheet" role="dialog" aria-modal="true">

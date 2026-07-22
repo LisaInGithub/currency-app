@@ -62,13 +62,13 @@ svg {
 .app {
   max-width: 480px;
   margin: 0 auto;
-  padding: 24px 20px 130px;
+  padding: 20px 20px 130px;
 }
 
 /* ---------- Nav ---------- */
 
 .nav {
-  padding: 8px 4px 20px;
+  padding: 4px 4px 16px;
 }
 
 .nav-top {
@@ -173,7 +173,7 @@ svg {
 .content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .card {
@@ -188,7 +188,7 @@ svg {
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 9px;
   position: relative;
 }
 
@@ -196,8 +196,8 @@ svg {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px 18px;
-  cursor: text;
+  padding: 13px 16px;
+  cursor: pointer;
   border-left: 6px solid transparent;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
 }
@@ -216,11 +216,15 @@ svg {
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
   box-shadow: var(--shadow-float);
   cursor: grabbing;
+  will-change: transform;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .drag-handle {
-  width: 28px;
-  height: 40px;
+  width: 36px;
+  height: 44px;
   flex: none;
   border: none;
   background: none;
@@ -233,6 +237,7 @@ svg {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .drag-handle svg { width: 18px; height: 18px; }
@@ -242,10 +247,12 @@ svg {
   height: 40px;
   flex: none;
   border-radius: 50%;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 32px;
+  line-height: 1;
   background: var(--bg-bottom);
   border: 1px solid var(--divider);
 }
@@ -254,7 +261,7 @@ svg {
   display: flex;
   flex-direction: column;
   flex: none;
-  width: 92px;
+  width: 82px;
   min-width: 0;
 }
 
@@ -322,42 +329,109 @@ svg {
   color: var(--primary-strong);
 }
 
-/* ---------- Calculator ---------- */
+/* ---------- Keypad sheet ---------- */
+/* Floats above the tab bar (and everything else) so the currency
+   cards stay put and visible while an amount is being entered —
+   no page scrolling needed to see both at once. */
 
-.calc-toolbar {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
+.keypad-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--surface);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  padding: 8px 20px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 30px rgba(58, 49, 43, 0.16);
+  transform: translateY(0);
+  transition: transform 0.3s var(--ease-spring);
 }
 
-.calc-toolbar button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.keypad-sheet.hidden {
+  transform: translateY(105%);
+  pointer-events: none;
+}
+
+.keypad-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 2px 12px;
+}
+
+.keypad-sheet-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.keypad-done {
+  border: none;
+  background: none;
+  color: var(--primary-strong);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.keypad-sheet .quick-amounts {
+  margin-bottom: 10px;
+}
+
+/* ---------- Keypad ---------- */
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.key {
+  height: 46px;
+  border-radius: 14px;
   border: 1px solid var(--divider);
   background: var(--surface);
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   cursor: pointer;
   box-shadow: var(--shadow-card);
   transition: transform 0.15s var(--ease-spring), background-color 0.15s ease;
 }
 
-.calc-toolbar button:active {
-  transform: scale(0.92);
+.key:active {
+  transform: scale(0.94);
   background: var(--bg-bottom);
 }
 
-.calc-toolbar .calc-equals {
+.key-op {
+  color: var(--primary-strong);
+}
+
+.key-clear {
+  color: var(--danger-ink);
+  border-color: var(--danger);
+}
+
+.key-equals {
   background: var(--primary);
   color: #FFFFFF;
   border-color: var(--primary);
 }
 
-.calc-toolbar .calc-clear {
-  color: var(--danger-ink);
-  border-color: var(--danger);
+.key-backspace {
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.key-backspace svg {
+  width: 22px;
+  height: 22px;
 }
 
 .quick-amounts {
