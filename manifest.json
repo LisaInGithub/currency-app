@@ -1,6 +1,6 @@
 {
-  "name": "旅行貨幣手帳",
-  "short_name": "貨幣手帳",
+  "name": "旅行貨幣",
+  "short_name": "旅行貨幣",
   "description": "台幣、蒙圖、美金、韓元即時匯率轉換",
   "start_url": "./index.html",
   "scope": "./",
