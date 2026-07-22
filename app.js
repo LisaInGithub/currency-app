@@ -120,6 +120,24 @@
     return n.toLocaleString('en-US', { maximumFractionDigits: digits });
   }
 
+  // Large amounts (e.g. MNT/VND/IDR conversions) can run to 8-9 digits —
+  // shrink the font so they stay inside the card instead of clipping.
+  function fitAmountText(input) {
+    const digits = (input.value.match(/[0-9]/g) || []).length;
+    let size = 28;
+    if (digits >= 11) size = 15;
+    else if (digits >= 9) size = 18;
+    else if (digits >= 7) size = 22;
+    else if (digits >= 6) size = 25;
+    input.style.fontSize = `${size}px`;
+  }
+
+  function setAmountValue(input, text) {
+    if (!input) return;
+    input.value = text;
+    fitAmountText(input);
+  }
+
   // Small recursive-descent parser for +-*/() so the amount fields can
   // double as a calculator (e.g. "120+35*2") without using eval().
   function parseExpression(expr) {
@@ -269,8 +287,7 @@
     }
     drag = null;
     buildCards();
-    const input = activeInput();
-    if (input) input.value = formatNumber(activeAmount);
+    setAmountValue(activeInput(), formatNumber(activeAmount));
     renderConversions();
   }
 
@@ -302,7 +319,7 @@
       card.classList.toggle('active', code === activeCurrency);
       if (code === activeCurrency) return;
       const input = card.querySelector('.amount-input');
-      input.value = formatNumber(amountUSD * rates[code]);
+      setAmountValue(input, formatNumber(amountUSD * rates[code]));
     });
   }
 
@@ -314,8 +331,7 @@
       btn.textContent = formatNumber(amt);
       btn.addEventListener('click', () => {
         activeAmount = amt;
-        const input = els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
-        if (input) input.value = formatNumber(amt);
+        setAmountValue(els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`), formatNumber(amt));
         renderConversions();
       });
       els.quickAmounts.appendChild(btn);
@@ -461,6 +477,8 @@
   function previewActiveAmount(raw) {
     const val = parseFloat(String(raw).replace(/,/g, ''));
     activeAmount = isFinite(val) ? val : 0;
+    const input = activeInput();
+    if (input) fitAmountText(input);
     renderConversions();
   }
 
@@ -470,15 +488,24 @@
     const result = parseExpression(input.value);
     if (!isFinite(result)) return;
     activeAmount = result;
-    input.value = formatNumber(result);
+    setAmountValue(input, formatNumber(result));
     renderConversions();
   }
 
   els.cardList.addEventListener('focusin', (e) => {
     const input = e.target.closest('.amount-input');
     if (!input) return;
-    activeCurrency = input.dataset.currency;
-    persistActive();
+    const newCode = input.dataset.currency;
+    if (newCode !== activeCurrency) {
+      // The field's displayed value is already the correctly converted
+      // amount for its currency (set by the previous renderConversions
+      // call) — carry that over as the new baseline instead of
+      // reinterpreting the old raw number in the new currency.
+      const val = parseFloat(String(input.value).replace(/,/g, ''));
+      if (isFinite(val)) activeAmount = val;
+      activeCurrency = newCode;
+      persistActive();
+    }
     renderQuickAmounts();
     renderConversions();
     renderSparkline();
@@ -573,8 +600,7 @@
     }
     persistSelected();
     buildCards();
-    const input = activeInput();
-    if (input) input.value = formatNumber(activeAmount);
+    setAmountValue(activeInput(), formatNumber(activeAmount));
     renderAll();
     renderManageList();
   }
@@ -774,8 +800,7 @@
   initTheme();
   loadStoredState();
   buildCards();
-  const initInput = activeInput();
-  if (initInput) initInput.value = formatNumber(activeAmount);
+  setAmountValue(activeInput(), formatNumber(activeAmount));
   renderAll();
   fetchLiveRates();
 })();
