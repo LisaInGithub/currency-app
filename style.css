@@ -384,33 +384,6 @@ svg {
   color: var(--keypad-text-secondary);
 }
 
-.keypad-sheet-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.keypad-undo {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: none;
-  color: var(--keypad-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  cursor: pointer;
-  transition: color 0.15s ease, transform 0.15s var(--ease-spring);
-}
-
-.keypad-undo svg { width: 18px; height: 18px; }
-
-.keypad-undo:active {
-  transform: scale(0.9);
-  color: var(--keypad-op);
-}
-
 .keypad-done {
   border: none;
   background: none;

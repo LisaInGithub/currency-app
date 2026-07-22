@@ -76,7 +76,6 @@
     keypadSheet: $('keypadSheet'),
     keypadLabel: $('keypadLabel'),
     keypadDone: $('keypadDone'),
-    keypadUndo: $('keypadUndo'),
     keypad: $('keypad'),
     quickAmounts: $('quickAmounts'),
     trendLabel: $('trendLabel'),
@@ -114,10 +113,6 @@
   // card is freshly selected or a value was just committed, so typing
   // a new number doesn't glue onto the old one.
   let pendingReplace = true;
-  // Snapshot of the active field's value from right before this edit
-  // session started (taken whenever the keypad opens for a card), so
-  // the undo button can restore it regardless of what's been typed since.
-  let undoValue = null;
 
   function currentRates() {
     const merged = { ...FALLBACK_RATES };
@@ -572,8 +567,6 @@
     els.keypadLabel.textContent = `${activeCurrency} · ${CURRENCIES[activeCurrency].name}`;
     els.keypadSheet.classList.remove('hidden');
     pendingReplace = true;
-    const input = activeInput();
-    undoValue = input ? input.value : null;
     ensureKeypadVisible();
   }
 
@@ -585,19 +578,6 @@
   }
 
   els.keypadDone.addEventListener('click', closeKeypadSheet);
-
-  // Restores the field to whatever it showed right before this edit
-  // session started (snapshotted in openKeypadSheet), regardless of how
-  // many keystrokes/quick-amount taps have happened since.
-  els.keypadUndo.addEventListener('click', () => {
-    if (undoValue === null) return;
-    const input = activeInput();
-    if (!input) return;
-    input.value = undoValue;
-    pendingReplace = true;
-    previewActiveAmount(undoValue);
-  });
-  els.keypadUndo.addEventListener('pointerdown', (e) => e.preventDefault());
 
   // Tapping anywhere outside the keypad (and outside any currency card,
   // so switching to a different card can hand off normally instead of
