@@ -371,9 +371,17 @@
       btn.type = 'button';
       btn.textContent = formatNumber(amt);
       btn.addEventListener('click', () => {
+        const input = els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`);
         activeAmount = amt;
-        setAmountValue(els.cardList.querySelector(`.amount-input[data-currency="${activeCurrency}"]`), formatNumber(amt));
+        setAmountValue(input, formatNumber(amt));
         renderConversions();
+        // Land in the same state as if the user had just typed this
+        // number on the keypad, so an operator/digit pressed next
+        // continues the expression (e.g. "100" then "×" then "5")
+        // instead of the leftover value getting wiped by a stale
+        // replace-mode flag.
+        pendingReplace = false;
+        if (input) input.focus();
       });
       els.quickAmounts.appendChild(btn);
     });
@@ -633,6 +641,7 @@
   // Prevent the keypad buttons from stealing focus away from the amount
   // field they're editing (avoids a blur/refocus flicker on every tap).
   els.keypad.addEventListener('pointerdown', (e) => e.preventDefault());
+  els.quickAmounts.addEventListener('pointerdown', (e) => e.preventDefault());
 
   els.keypad.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-key]');
