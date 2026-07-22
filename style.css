@@ -104,7 +104,7 @@ svg {
   font-weight: 700;
   letter-spacing: -0.01em;
   margin: 0 0 4px;
-  color: var(--text-primary);
+  color: #FFF3C0;
 }
 
 .nav-subtitle {
@@ -880,6 +880,7 @@ svg {
   }
 
   :root:not([data-theme="light"]) .amount-input::placeholder { color: #3E5975; }
+  :root:not([data-theme="light"]) .nav-title { color: var(--text-primary); }
   :root:not([data-theme="light"]) .nav-subtitle,
   :root:not([data-theme="light"]) .footer { color: var(--text-secondary); }
   :root:not([data-theme="light"]) .add-currency-card { border-color: var(--divider); color: var(--text-secondary); }
@@ -914,6 +915,7 @@ svg {
 }
 
 :root[data-theme="dark"] .amount-input::placeholder { color: #3E5975; }
+:root[data-theme="dark"] .nav-title { color: var(--text-primary); }
 :root[data-theme="dark"] .nav-subtitle,
 :root[data-theme="dark"] .footer { color: var(--text-secondary); }
 :root[data-theme="dark"] .add-currency-card { border-color: var(--divider); color: var(--text-secondary); }
