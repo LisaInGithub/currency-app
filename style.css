@@ -1,13 +1,19 @@
 :root {
-  --primary: #F6B26B;
-  --primary-strong: #EF9B4E;
-  --secondary: #FFD9B3;
-  --accent: #FFB87A;
-  --bg-top: #F3E7D6;
-  --bg-bottom: #E8D4B4;
-  --surface: #F8EFE2;
-  --card: #F8EFE2;
-  --divider: #DFC9A3;
+  /* Sunshine & Serenity: warm cream-yellow cards floating on a pale sky
+     gradient, with a golden-orange accent standing in for the old
+     apricot palette. */
+  --primary: #F3A633;
+  --primary-strong: #E58D20;
+  --secondary: #FFDDA2;
+  --accent: #F4C94D;
+  --bg-top: #EAF7FF;
+  --bg-mid: #D6ECFA;
+  --bg-bottom: #C7E5F7;
+  --surface: #FEF5D3;
+  --card: #FEF5D3;
+  --card-selected-bg: #FFF4D4;
+  --card-hover: #FCE97C;
+  --divider: #ECDFAF;
   --success: #8FD3A7;
   --success-ink: #4E8F68;
   --success-bg: #EAF7EF;
@@ -16,26 +22,28 @@
   --danger: #F8A6A6;
   --danger-ink: #B15B5B;
   --danger-bg: #FDEDED;
-  --text-primary: #3A312B;
-  --text-secondary: #7A6E63;
+  --text-primary: #2C3A47;
+  --text-secondary: #6E7F91;
 
-  /* The keypad panel is deliberately a fixed dark gray-brown, independent
+  /* The keypad panel is deliberately a fixed dusk-blue console, independent
      of the light/dark theme tokens above, so it always reads as a
      distinct "input console" against the page behind it. */
-  --keypad-bg: #443A32;
-  --keypad-key-bg: #564A40;
-  --keypad-key-active-bg: #6B5C4E;
-  --keypad-text: #F4EAE0;
-  --keypad-text-secondary: #C9B9A8;
-  --keypad-divider: #6B5C4E;
-  --keypad-op: #FFC088;
-  --keypad-danger: #F0A79D;
+  --keypad-bg: #34536A;
+  --keypad-key-bg: #49667C;
+  --keypad-key-active-bg: #5A7890;
+  --keypad-text: #FFFFFF;
+  --keypad-text-secondary: #C9DCE8;
+  --keypad-divider: #5A7890;
+  --keypad-op: #FFDDA2;
+  --keypad-op-bg: #F3A633;
+  --keypad-equals-bg: #F7A34A;
+  --keypad-danger: #FFB3A7;
 
-  --radius-card: 24px;
+  --radius-card: 28px;
   --radius-button: 18px;
-  --radius-sheet: 26px;
-  --shadow-card: 0 6px 20px rgba(58, 49, 43, 0.06);
-  --shadow-float: 0 10px 30px rgba(58, 49, 43, 0.10);
+  --radius-sheet: 28px;
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 8px 30px rgba(0, 0, 0, 0.08);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "PingFang TC", "Helvetica Neue", Arial, sans-serif;
@@ -50,7 +58,7 @@ html, body {
 }
 
 body {
-  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-mid) 55%, var(--bg-bottom));
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-system);
@@ -92,7 +100,7 @@ svg {
 
 .nav-title {
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
   margin: 0 0 4px;
   color: var(--text-primary);
@@ -138,7 +146,7 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(248, 239, 226, 0.7);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--divider);
   border-radius: 999px;
   padding: 7px 14px;
@@ -168,7 +176,7 @@ svg {
 
 .banner {
   border: 1px solid var(--warning);
-  background: #FFF7E8;
+  background: #FFF6DE;
   color: var(--warning-ink);
   font-size: 13px;
   font-weight: 500;
@@ -210,14 +218,14 @@ svg {
   gap: 14px;
   padding: 13px 16px;
   cursor: pointer;
-  border-left: 6px solid transparent;
+  border: 2px solid transparent;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
 }
 
 .currency-card.active {
-  border-left-color: var(--primary);
-  background-color: rgba(246, 178, 107, 0.1);
-  box-shadow: 0 0 0 1.5px rgba(246, 178, 107, 0.5), var(--shadow-float);
+  border-color: var(--accent);
+  background-color: var(--card-selected-bg);
+  box-shadow: inset 0 1px 4px rgba(244, 201, 77, 0.18), var(--shadow-card);
 }
 
 .currency-card.active .currency-code {
@@ -279,7 +287,7 @@ svg {
 
 .currency-code {
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.01em;
 }
 
@@ -317,7 +325,7 @@ svg {
   -webkit-touch-callout: none;
 }
 
-.amount-input::placeholder { color: #E7D9C8; }
+.amount-input::placeholder { color: #E8D9A0; }
 
 .add-currency-card {
   display: flex;
@@ -426,7 +434,12 @@ svg {
 }
 
 .key-op {
+  background: var(--keypad-op-bg);
   color: var(--keypad-op);
+}
+
+.key-op:active {
+  background: var(--keypad-op-bg);
 }
 
 .key-clear {
@@ -434,7 +447,7 @@ svg {
 }
 
 .key-equals {
-  background: var(--primary);
+  background: var(--keypad-equals-bg);
   color: #FFFFFF;
 }
 
@@ -473,7 +486,7 @@ svg {
 
 .quick-amounts button:active {
   transform: scale(0.94);
-  background: var(--bg-bottom);
+  background: var(--card-hover);
 }
 
 /* ---------- Trend / Sparkline ---------- */
@@ -562,11 +575,11 @@ svg {
   margin-bottom: calc(16px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(248, 239, 226, 0.72);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(248, 239, 226, 0.6);
-  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 30px;
   padding: 8px;
   box-shadow: var(--shadow-float);
   z-index: 30;
@@ -594,8 +607,8 @@ svg {
 }
 
 .tab-btn.active {
-  color: var(--primary-strong);
-  background: rgba(246, 178, 107, 0.14);
+  color: var(--primary);
+  background: rgba(243, 166, 51, 0.14);
 }
 
 /* ---------- Sheets ---------- */
@@ -603,7 +616,7 @@ svg {
 .sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(58, 49, 43, 0.32);
+  background: rgba(18, 34, 48, 0.35);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -625,7 +638,7 @@ svg {
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
   overflow-y: auto;
-  box-shadow: 0 -10px 30px rgba(58, 49, 43, 0.14);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.12);
   transform: translateY(0);
   transition: transform 0.35s var(--ease-spring);
 }
@@ -694,11 +707,11 @@ svg {
 }
 
 .picker-item:active {
-  background: var(--bg-bottom);
+  background: var(--card-hover);
 }
 
 .picker-item.selected {
-  background: rgba(246, 178, 107, 0.12);
+  background: rgba(244, 201, 77, 0.16);
 }
 
 .picker-item .currency-meta { flex: 1; }
@@ -844,58 +857,65 @@ svg {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg-top: #221C16;
-    --bg-bottom: #1A1510;
-    --surface: #2C241C;
-    --card: #2C241C;
-    --divider: #3C3226;
-    --text-primary: #F5EBE0;
-    --text-secondary: #B7A692;
-    --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.28);
-    --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.4);
+    /* A twilight-sky variant of the same palette (drawn from the deeper
+       blues in the Sunshine & Serenity brief) rather than the old
+       coffee-brown dark mode. */
+    --bg-top: #2A6D9E;
+    --bg-mid: #1F5883;
+    --bg-bottom: #1A4C7A;
+    --surface: #1C3348;
+    --card: #1C3348;
+    --card-selected-bg: #24425C;
+    --divider: #2F4D66;
+    --text-primary: #EAF4FB;
+    --text-secondary: #9FC0D6;
+    --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.32);
+    --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.42);
     --success-ink: #A9E0BE;
-    --success-bg: rgba(143, 211, 167, 0.14);
+    --success-bg: rgba(143, 211, 167, 0.16);
     --warning-ink: #F4CE8B;
     --danger-ink: #F5BFBF;
-    --danger-bg: rgba(248, 166, 166, 0.14);
+    --danger-bg: rgba(248, 166, 166, 0.16);
   }
 
-  :root:not([data-theme="light"]) .amount-input::placeholder { color: #4A3F30; }
-  :root:not([data-theme="light"]) .status-badge { background: rgba(44, 36, 28, 0.6); }
-  :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.1); }
-  :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.06); }
-  :root:not([data-theme="light"]) .manual-row input { background: #221C16; }
-  :root:not([data-theme="light"]) .tab-bar { background: rgba(44, 36, 28, 0.72); border-color: rgba(255,255,255,0.08); }
+  :root:not([data-theme="light"]) .amount-input::placeholder { color: #3E5975; }
+  :root:not([data-theme="light"]) .status-badge { background: rgba(16, 32, 46, 0.55); }
+  :root:not([data-theme="light"]) .banner { background: rgba(249, 201, 122, 0.12); }
+  :root:not([data-theme="light"]) .trend-delta { background: rgba(255, 255, 255, 0.08); }
+  :root:not([data-theme="light"]) .manual-row input { background: #16293A; }
+  :root:not([data-theme="light"]) .tab-bar { background: rgba(16, 32, 46, 0.68); border-color: rgba(255,255,255,0.10); }
   :root:not([data-theme="light"]) .sheet-close,
   :root:not([data-theme="light"]) .settings-block,
-  :root:not([data-theme="light"]) .currency-avatar { background: #221C16; }
-  :root:not([data-theme="light"]) .btn-primary { color: #221C16; }
+  :root:not([data-theme="light"]) .currency-avatar { background: #16293A; }
+  :root:not([data-theme="light"]) .btn-primary { color: #16293A; }
 }
 
 :root[data-theme="dark"] {
-  --bg-top: #221C16;
-  --bg-bottom: #1A1510;
-  --surface: #2C241C;
-  --card: #2C241C;
-  --divider: #3C3226;
-  --text-primary: #F5EBE0;
-  --text-secondary: #B7A692;
-  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.28);
-  --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --bg-top: #2A6D9E;
+  --bg-mid: #1F5883;
+  --bg-bottom: #1A4C7A;
+  --surface: #1C3348;
+  --card: #1C3348;
+  --card-selected-bg: #24425C;
+  --divider: #2F4D66;
+  --text-primary: #EAF4FB;
+  --text-secondary: #9FC0D6;
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.32);
+  --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.42);
   --success-ink: #A9E0BE;
-  --success-bg: rgba(143, 211, 167, 0.14);
+  --success-bg: rgba(143, 211, 167, 0.16);
   --warning-ink: #F4CE8B;
   --danger-ink: #F5BFBF;
-  --danger-bg: rgba(248, 166, 166, 0.14);
+  --danger-bg: rgba(248, 166, 166, 0.16);
 }
 
-:root[data-theme="dark"] .amount-input::placeholder { color: #4A3F30; }
-:root[data-theme="dark"] .status-badge { background: rgba(44, 36, 28, 0.6); }
-:root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.1); }
-:root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.06); }
-:root[data-theme="dark"] .manual-row input { background: #221C16; }
-:root[data-theme="dark"] .tab-bar { background: rgba(44, 36, 28, 0.72); border-color: rgba(255,255,255,0.08); }
+:root[data-theme="dark"] .amount-input::placeholder { color: #3E5975; }
+:root[data-theme="dark"] .status-badge { background: rgba(16, 32, 46, 0.55); }
+:root[data-theme="dark"] .banner { background: rgba(249, 201, 122, 0.12); }
+:root[data-theme="dark"] .trend-delta { background: rgba(255, 255, 255, 0.08); }
+:root[data-theme="dark"] .manual-row input { background: #16293A; }
+:root[data-theme="dark"] .tab-bar { background: rgba(16, 32, 46, 0.68); border-color: rgba(255,255,255,0.10); }
 :root[data-theme="dark"] .sheet-close,
 :root[data-theme="dark"] .settings-block,
-:root[data-theme="dark"] .currency-avatar { background: #221C16; }
-:root[data-theme="dark"] .btn-primary { color: #221C16; }
+:root[data-theme="dark"] .currency-avatar { background: #16293A; }
+:root[data-theme="dark"] .btn-primary { color: #16293A; }
